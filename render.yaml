@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: space-dashboard
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn space_dashboard.wsgi:application"
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: NASA_API_KEY
+        sync: false
