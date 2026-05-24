@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Space Dashboard{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'nasa/css/main.css' %}" />
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Global nav -->
+  <nav class="global-nav">
+    <div class="global-nav__brand">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2a8 8 0 1 1 0 16A8 8 0 0 1 12 4zm0 2a6 6 0 1 0 0 12A6 6 0 0 0 12 6zm0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+      </svg>
+      Space Dashboard
+    </div>
+    <ul class="global-nav__links">
+      <li><a href="#apod">Imagen del día</a></li>
+      <li><a href="#asteroides">Asteroides</a></li>
+      <li><a href="#marte">Marte</a></li>
+      <li><a href="#tierra">Tierra</a></li>
+    </ul>
+  </nav>
+
+  <!-- Sub-nav -->
+  <div class="sub-nav">
+    <span class="sub-nav__title">NASA APIs</span>
+    <ul class="sub-nav__links">
+      <li><a href="#apod">APOD</a></li>
+      <li><a href="#asteroides">NeoWs</a></li>
+      <li><a href="#marte">Mars Rover</a></li>
+      <li><a href="#tierra">EPIC</a></li>
+    </ul>
+  </div>
+
+  <main class="page-body">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <p class="footer__text">
+      Datos provistos por <a class="footer__link" href="https://api.nasa.gov" target="_blank" rel="noopener">NASA Open APIs</a>
+      &nbsp;·&nbsp; Space Dashboard {% now "Y" %}
+    </p>
+  </footer>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

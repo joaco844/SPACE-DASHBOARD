@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Space Dashboard — NASA Data{% endblock %}
+
+{% block content %}
+
+<!-- ── APOD ──────────────────────────────────────────────── -->
+<section class="tile tile--dark" id="apod">
+  <div class="tile__inner apod-layout">
+
+    <!-- Imagen -->
+    <div class="apod-media">
+      {% if apod.media_type == "video" %}
+        {% if ".mp4" in apod.url or ".webm" in apod.url or ".ogv" in apod.url %}
+          <video class="apod-embed" autoplay muted loop playsinline>
+            <source src="{{ apod.url }}" type="video/mp4">
+          </video>
+        {% else %}
+          <iframe
+            class="apod-embed"
+            src="{{ apod.url }}"
+            allowfullscreen
+            title="{{ apod.title }}"
+          ></iframe>
+        {% endif %}
+      {% elif apod.hdurl %}
+        <img class="apod-image" src="{{ apod.hdurl }}" alt="{{ apod.title }}" loading="eager" />
+      {% elif apod.url %}
+        <img class="apod-image" src="{{ apod.url }}" alt="{{ apod.title }}" loading="eager" />
+      {% endif %}
+    </div>
+
+    <!-- Texto -->
+    <div class="apod-content">
+      <p class="tile__label">Astronomy Picture of the Day</p>
+      <h1 class="tile__headline">{{ apod.title|default:"Imagen del día" }}</h1>
+      <p class="apod-date">{{ apod.date|default:"" }}</p>
+      {% if apod.explanation %}
+        <p class="apod-explanation">{{ apod.explanation }}</p>
+      {% endif %}
+      {% if apod.copyright %}
+        <p class="apod-copyright">© {{ apod.copyright }}</p>
+      {% endif %}
+    </div>
+
+  </div>
+</section>
+
+<!-- ── NeoWs ──────────────────────────────────────────────── -->
+<section class="tile tile--light" id="asteroides">
+  <div class="tile__inner">
+    <p class="tile__label">Near Earth Objects</p>
+    <h2 class="tile__headline">Asteroides cercanos hoy</h2>
+    <p class="tile__tagline">
+      {{ asteroides|length }} objeto{{ asteroides|length|pluralize }} detectado{{ asteroides|length|pluralize }} en las próximas 24 h
+    </p>
+
+    {% if asteroides %}
+      <div class="card-grid card-grid--asteroids">
+        {% for a in asteroides %}
+          <div class="asteroid-chip">
+            <div class="asteroid-chip__header">
+              <p class="asteroid-chip__name">{{ a.name }}</p>
+              <span class="card__badge {% if a.is_potentially_hazardous_asteroid %}card__badge--danger{% endif %}">
+                {% if a.is_potentially_hazardous_asteroid %}⚠ Peligroso{% else %}Seguro{% endif %}
+              </span>
+            </div>
+            <div class="asteroid-chip__body">
+              <p class="asteroid-chip__detail">Diám. {{ a.estimated_diameter.kilometers.estimated_diameter_min|floatformat:2 }}–{{ a.estimated_diameter.kilometers.estimated_diameter_max|floatformat:2 }} km</p>
+              <p class="asteroid-chip__detail">Vel. {{ a.close_approach_data.0.relative_velocity.kilometers_per_hour|floatformat:0 }} km/h</p>
+              <p class="asteroid-chip__detail">{{ a.close_approach_data.0.miss_distance.kilometers|floatformat:0 }} km de distancia</p>
+              <p class="asteroid-chip__detail">{{ a.close_approach_data.0.miss_distance.lunar|floatformat:1 }} distancias lunares</p>
+              <p class="asteroid-chip__detail">Máx. aproximación: {{ a.close_approach_data.0.close_approach_date_full }}</p>
+            </div>
+            <a class="card__link asteroid-chip__link" href="{{ a.nasa_jpl_url }}" target="_blank" rel="noopener">Ver en JPL ↗</a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="state-empty">No hay datos de asteroides disponibles.</p>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ── Mars Rover ─────────────────────────────────────────── -->
+<section class="tile tile--dark-2" id="marte">
+  <div class="tile__inner">
+    <p class="tile__label">Mars Rover — Curiosity</p>
+    <h2 class="tile__headline">Fotos desde Marte</h2>
+    <p class="tile__tagline">
+      {% if fotos_marte %}Sol {{ fotos_marte.0.sol }} · {{ fotos_marte.0.earth_date }}{% else %}En tiempo real{% endif %}
+    </p>
+
+    {% if fotos_marte %}
+      <div class="card-grid">
+        {% for foto in fotos_marte %}
+          <div class="card">
+            <img
+              class="card__image card__image--wide"
+              src="{{ foto.img_src }}"
+              alt="Foto de Marte — {{ foto.camera.full_name }}"
+              loading="lazy"
+            />
+            <p class="card__name">{{ foto.camera.full_name }}</p>
+            <p class="card__meta">Sol {{ foto.sol }} · {{ foto.earth_date }}</p>
+            <a class="card__link" href="{{ foto.img_src }}" target="_blank" rel="noopener">Ver completa ↗</a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="state-empty" style="color:var(--color-muted-on-dark);">No hay fotos disponibles.</p>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ── EPIC ───────────────────────────────────────────────── -->
+<section class="tile tile--parchment" id="tierra">
+  <div class="tile__inner">
+    <p class="tile__label">Earth Polychromatic Imaging Camera</p>
+    <h2 class="tile__headline">La Tierra, hoy</h2>
+    <p class="tile__tagline">
+      {% if epic %}{{ epic.0.date|slice:":10" }}{% else %}Vista desde el punto L1{% endif %}
+    </p>
+
+    {% if epic %}
+      {% with foto=epic.0 %}
+        {% with date_parts=foto.date|slice:":10" %}
+          <img
+            class="epic-image"
+            src="https://epic.gsfc.nasa.gov/archive/natural/{{ date_parts|slice:":4" }}/{{ date_parts|slice:"5:7" }}/{{ date_parts|slice:"8:10" }}/png/{{ foto.image }}.png"
+            alt="Tierra desde DSCOVR — {{ foto.date }}"
+            loading="lazy"
+          />
+        {% endwith %}
+      {% endwith %}
+
+      <p class="apod-explanation" style="margin-top:var(--space-xxl);">
+        {{ epic.0.caption|default:"Imagen capturada por el satélite DSCOVR desde el punto de Lagrange L1, a ~1.5 millones de km de la Tierra." }}
+      </p>
+
+      <div class="btn-group">
+        <a class="btn btn--primary" href="https://epic.gsfc.nasa.gov" target="_blank" rel="noopener">Ver galería EPIC</a>
+      </div>
+    {% else %}
+      <p class="state-empty">No hay imagen EPIC disponible.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}
