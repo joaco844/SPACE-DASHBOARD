@@ -61,6 +61,12 @@
         </a>
       </li>
     </ul>
+
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="es" onclick="applyLang('es')">ES</button>
+      <span class="lang-sep">|</span>
+      <button class="lang-btn" data-lang="en" onclick="applyLang('en')">EN</button>
+    </div>
   </nav>
 
   <!-- Sub-nav -->
@@ -86,6 +92,297 @@
       &nbsp;·&nbsp; Space Dashboard {% now "Y" %}
     </p>
   </footer>
+
+  <script>
+  // ── i18n system ───────────────────────────────────────────────
+  const I18N = {
+    es: {
+      // subnav
+      'subnav.weather':    'Clima',
+      'subnav.trajectory': 'Trayectoria',
+      'subnav.windows':    'Ventanas',
+      'subnav.simulator':  'Simulador',
+      'subnav.comets':     'Cometas',
+      // dashboard
+      'dashboard.asteroids.headline': 'Asteroides cercanos hoy',
+      'dashboard.asteroids.suffix':   'objeto(s) detectado(s) en las próximas 24 h',
+      'dashboard.mars.headline':      'Fotos desde Marte',
+      'dashboard.mars.total':         'fotos totales',
+      'dashboard.mars.landing':       'Aterrizaje:',
+      'dashboard.mars.view':          'Ver completa ↗',
+      'dashboard.epic.headline':      'La Tierra, hoy',
+      'dashboard.epic.btn':           'Ver galería EPIC',
+      'badge.hazardous':   '⚠ Peligroso',
+      'badge.safe':        'Seguro',
+      'asteroid.diam':     'Diám.',
+      'asteroid.dist':     'km de distancia',
+      'asteroid.lunar':    'distancias lunares',
+      'asteroid.mag':      'Magnitud H:',
+      'asteroid.approach': 'Máx. aproximación:',
+      'asteroid.jpl':      'Ver en JPL ↗',
+      'state.no-asteroids': 'No hay datos de asteroides disponibles.',
+      'state.no-photos':    'No hay fotos disponibles.',
+      'state.no-epic':      'No hay imagen EPIC disponible.',
+      // earth
+      'earth.tagline':          'Visualización global interactiva',
+      'earth.temp':             '🌡 Temperatura',
+      'earth.ice':              '🧊 Hielo Polar',
+      'earth.co2.headline':     'CO₂ atmosférico',
+      'earth.co2.tagline':      'Concentración histórica en partes por millón',
+      'earth.co2.note':         'Datos: NOAA Global Monitoring Laboratory — Mauna Loa Observatory. Registro continuo desde 1958.',
+      'earth.stats.label':      'Indicadores clave',
+      'earth.stats.headline':   'El planeta en números',
+      'earth.stats.tagline':    'Datos actualizados por NASA y NOAA',
+      'earth.stats.co2.label':  'CO₂ actual',
+      'earth.stats.co2.sub':    '+50% vs era pre-industrial',
+      'earth.stats.temp.label': 'Temperatura global',
+      'earth.stats.temp.sub':   'Anomalía vs promedio 1951–1980',
+      'earth.stats.ice.label':  'Hielo ártico',
+      'earth.stats.ice.sub':    'Reducción por década desde 1979',
+      // eonet
+      'eonet.headline':        'Eventos naturales activos',
+      'eonet.tagline.suffix':  'evento(s) en curso',
+      'eonet.events.headline': 'Todos los eventos',
+      'eonet.filter.all':      'Todos',
+      'eonet.map.btn':         'Ver en mapa ↗',
+      'state.no-events':       'No hay eventos activos disponibles.',
+      // gallery
+      'gallery.favorites':    'Favoritos',
+      'gallery.no-favorites': 'Sin favoritos aún.',
+      'gallery.new-playlist': '+ Nueva',
+      'gallery.no-playlists': 'Sin playlists aún.',
+      'gallery.search.placeholder': 'Buscar en el universo...',
+      'gallery.search.btn':   'Buscar',
+      'gallery.topic.galaxies':     'Galaxias',
+      'gallery.topic.mars':         'Marte',
+      'gallery.topic.nebulas':      'Nebulosas',
+      'gallery.topic.blackholes':   'Agujeros negros',
+      'gallery.topic.earth':        'Tierra',
+      // mission
+      'mission.tagline':          'Planificá tu viaje al cosmos con física real',
+      'mission.btn.calc':         'Calcular trayectoria',
+      'mission.btn.windows':      'Ver ventanas',
+      'mission.calc.label':       'Trayectorias',
+      'mission.calc.headline':    'Calculadora de trayectoria',
+      'mission.calc.tagline':     'Destino, tipo de misión y fecha de lanzamiento',
+      'mission.field.dest':       'Destino',
+      'mission.field.type':       'Tipo de misión',
+      'mission.field.date':       'Fecha de lanzamiento',
+      'mission.field.mass':       'Masa del cohete (toneladas)',
+      'mission.btn.calculate':    'Calcular misión',
+      'mission.placeholder.text': 'Completá el formulario y presioná',
+      'mission.placeholder.action': 'Calcular misión',
+      'mission.result.time':      'Duración del viaje',
+      'mission.result.arrival':   'Llegada estimada',
+      'mission.result.deltav':    'Delta-V total',
+      'mission.result.fuel':      'Combustible estimado',
+      'mission.windows.headline': 'Ventanas de lanzamiento a Marte',
+      'mission.windows.tagline':  'Las alineaciones óptimas ocurren cada ~26 meses',
+      'mission.windows.note':     'Calculado usando el período sinódico de Marte (779.94 días). Las ventanas están centradas en la oposición Tierra–Marte.',
+      'mission.sim.headline':     'Simulador de misión a Marte',
+      'mission.sim.tagline':      'Recorrido paso a paso de un viaje real',
+      'mission.sim.desc':         'Una misión tripulada a Marte involucra múltiples fases críticas. Este simulador muestra el perfil completo basado en la próxima ventana de lanzamiento disponible.',
+      'mission.sim.launch-label': 'Fecha de lanzamiento',
+      'mission.sim.arrival-label':'Llegada a Marte',
+      'mission.sim.transfer':     'Transferencia Hohmann',
+      'mission.sim.ready':        'Listo para simular',
+      'mission.sim.start':        'Iniciar simulación',
+      'mission.sim.reset':        'Resetear',
+      'mission.sim.done':         'Misión completada ✓',
+      'mission.sim.running':      'Simulando…',
+      'window.open':      '● Abierta ahora',
+      'window.closed':    'Cerrada',
+      'window.upcoming':  'Próxima',
+      'window.days-left': 'días restantes',
+      'window.days-open': 'días para apertura',
+      'window.opposition':'Oposición:',
+      'window.arrival':   'Llegada:',
+      'phase.0.name': 'Lanzamiento',              'phase.0.desc': 'Encendido de motores y despegue desde la Tierra',
+      'phase.1.name': 'Separación de etapas',     'phase.1.desc': 'La primera etapa se separa y retorna para reutilización',
+      'phase.2.name': 'Órbita baja terrestre',    'phase.2.desc': 'Inserción en órbita circular a ~400 km de altitud',
+      'phase.3.name': 'Inyección transmarsciana', 'phase.3.desc': 'Quema de salida hacia la órbita de transferencia Hohmann',
+      'phase.4.name': 'Corrección de rumbo',      'phase.4.desc': 'Pequeñas maniobras para ajustar la trayectoria heliocéntrica',
+      'phase.5.name': 'Captura orbital en Marte', 'phase.5.desc': 'Frenado aerodinámico e inserción en órbita marciana',
+      'phase.6.name': 'Descenso y aterrizaje',    'phase.6.desc': 'Entrada en la atmósfera, despliegue de paracaídas y aterrizaje',
+      // solar
+      'solar.headline':        'Sistema Solar en 3D',
+      'solar.tagline':         'Planetas y cometas activos con órbitas reales',
+      'solar.btn.sim':         'Ver simulador',
+      'solar.btn.comets':      'Ver cometas',
+      'solar.sim.headline':    'Posiciones en tiempo real',
+      'solar.sim.tagline':     'Fecha de hoy · Órbitas de Kepler · Arrastrá para rotar',
+      'solar.ctrl.speed':      'Velocidad',
+      'solar.ctrl.scale':      'Escala',
+      'solar.ctrl.pause':      'Pausar',
+      'solar.ctrl.resume':     'Reanudar',
+      'solar.date.label':      'Fecha simulada:',
+      'solar.comets.headline': 'Cometas activos',
+      'solar.comets.tagline':  'Elementos orbitales en tiempo real desde NASA/JPL',
+      'solar.comet.sma':       'Semi-eje mayor:',
+      'solar.comet.ecc':       'Excentricidad:',
+      'solar.comet.inc':       'Inclinación:',
+      'solar.comet.per':       'Período:',
+      'solar.no-comets':       'No se encontraron cometas activos en este momento.',
+      'solar.tooltip.dist':    'Distancia al Sol:',
+      'solar.tooltip.per':     'Período orbital:',
+      'solar.tooltip.ecc':     'Excentricidad:',
+      'solar.days':            'días',
+    },
+    en: {
+      // subnav
+      'subnav.weather':    'Weather',
+      'subnav.trajectory': 'Trajectory',
+      'subnav.windows':    'Windows',
+      'subnav.simulator':  'Simulator',
+      'subnav.comets':     'Comets',
+      // dashboard
+      'dashboard.asteroids.headline': 'Near-Earth Asteroids Today',
+      'dashboard.asteroids.suffix':   'object(s) detected in the next 24 h',
+      'dashboard.mars.headline':      'Photos from Mars',
+      'dashboard.mars.total':         'total photos',
+      'dashboard.mars.landing':       'Landing:',
+      'dashboard.mars.view':          'View full ↗',
+      'dashboard.epic.headline':      'Earth, today',
+      'dashboard.epic.btn':           'View EPIC gallery',
+      'badge.hazardous':   '⚠ Hazardous',
+      'badge.safe':        'Safe',
+      'asteroid.diam':     'Diam.',
+      'asteroid.dist':     'km distance',
+      'asteroid.lunar':    'lunar distances',
+      'asteroid.mag':      'H magnitude:',
+      'asteroid.approach': 'Closest approach:',
+      'asteroid.jpl':      'View at JPL ↗',
+      'state.no-asteroids': 'No asteroid data available.',
+      'state.no-photos':    'No photos available.',
+      'state.no-epic':      'No EPIC image available.',
+      // earth
+      'earth.tagline':          'Interactive global visualization',
+      'earth.temp':             '🌡 Temperature',
+      'earth.ice':              '🧊 Polar Ice',
+      'earth.co2.headline':     'Atmospheric CO₂',
+      'earth.co2.tagline':      'Historical concentration in parts per million',
+      'earth.co2.note':         'Data: NOAA Global Monitoring Laboratory — Mauna Loa Observatory. Continuous record since 1958.',
+      'earth.stats.label':      'Key indicators',
+      'earth.stats.headline':   'The planet in numbers',
+      'earth.stats.tagline':    'Data updated by NASA and NOAA',
+      'earth.stats.co2.label':  'Current CO₂',
+      'earth.stats.co2.sub':    '+50% vs pre-industrial era',
+      'earth.stats.temp.label': 'Global temperature',
+      'earth.stats.temp.sub':   'Anomaly vs 1951–1980 average',
+      'earth.stats.ice.label':  'Arctic ice',
+      'earth.stats.ice.sub':    'Reduction per decade since 1979',
+      // eonet
+      'eonet.headline':        'Active natural events',
+      'eonet.tagline.suffix':  'event(s) in progress',
+      'eonet.events.headline': 'All events',
+      'eonet.filter.all':      'All',
+      'eonet.map.btn':         'View on map ↗',
+      'state.no-events':       'No active events available.',
+      // gallery
+      'gallery.favorites':    'Favorites',
+      'gallery.no-favorites': 'No favorites yet.',
+      'gallery.new-playlist': '+ New',
+      'gallery.no-playlists': 'No playlists yet.',
+      'gallery.search.placeholder': 'Search the universe...',
+      'gallery.search.btn':   'Search',
+      'gallery.topic.galaxies':   'Galaxies',
+      'gallery.topic.mars':       'Mars',
+      'gallery.topic.nebulas':    'Nebulae',
+      'gallery.topic.blackholes': 'Black holes',
+      'gallery.topic.earth':      'Earth',
+      // mission
+      'mission.tagline':          'Plan your journey to the cosmos with real physics',
+      'mission.btn.calc':         'Calculate trajectory',
+      'mission.btn.windows':      'View windows',
+      'mission.calc.label':       'Trajectories',
+      'mission.calc.headline':    'Trajectory Calculator',
+      'mission.calc.tagline':     'Destination, mission type and launch date',
+      'mission.field.dest':       'Destination',
+      'mission.field.type':       'Mission type',
+      'mission.field.date':       'Launch date',
+      'mission.field.mass':       'Rocket mass (tons)',
+      'mission.btn.calculate':    'Calculate mission',
+      'mission.placeholder.text': 'Fill out the form and click',
+      'mission.placeholder.action': 'Calculate mission',
+      'mission.result.time':      'Travel duration',
+      'mission.result.arrival':   'Estimated arrival',
+      'mission.result.deltav':    'Total delta-V',
+      'mission.result.fuel':      'Estimated fuel',
+      'mission.windows.headline': 'Mars Launch Windows',
+      'mission.windows.tagline':  'Optimal alignments occur every ~26 months',
+      'mission.windows.note':     'Calculated using Mars synodic period (779.94 days). Windows are centered on Earth–Mars opposition.',
+      'mission.sim.headline':     'Mars Mission Simulator',
+      'mission.sim.tagline':      'Step-by-step journey of a real mission',
+      'mission.sim.desc':         'A crewed mission to Mars involves multiple critical phases. This simulator shows the complete profile based on the next available launch window.',
+      'mission.sim.launch-label': 'Launch date',
+      'mission.sim.arrival-label':'Mars arrival',
+      'mission.sim.transfer':     'Hohmann transfer',
+      'mission.sim.ready':        'Ready to simulate',
+      'mission.sim.start':        'Start simulation',
+      'mission.sim.reset':        'Reset',
+      'mission.sim.done':         'Mission complete ✓',
+      'mission.sim.running':      'Simulating…',
+      'window.open':      '● Open now',
+      'window.closed':    'Closed',
+      'window.upcoming':  'Upcoming',
+      'window.days-left': 'days remaining',
+      'window.days-open': 'days to open',
+      'window.opposition':'Opposition:',
+      'window.arrival':   'Arrival:',
+      'phase.0.name': 'Launch',              'phase.0.desc': 'Engine ignition and liftoff from Earth',
+      'phase.1.name': 'Stage separation',    'phase.1.desc': 'First stage separates and returns for reuse',
+      'phase.2.name': 'Low Earth orbit',     'phase.2.desc': 'Insertion into circular orbit at ~400 km altitude',
+      'phase.3.name': 'Trans-Mars injection','phase.3.desc': 'Departure burn toward Hohmann transfer orbit',
+      'phase.4.name': 'Course correction',   'phase.4.desc': 'Small maneuvers to adjust heliocentric trajectory',
+      'phase.5.name': 'Mars orbital capture','phase.5.desc': 'Aerodynamic braking and insertion into Martian orbit',
+      'phase.6.name': 'Descent and landing', 'phase.6.desc': 'Atmospheric entry, parachute deployment and landing',
+      // solar
+      'solar.headline':        '3D Solar System',
+      'solar.tagline':         'Planets and active comets with real orbits',
+      'solar.btn.sim':         'View simulator',
+      'solar.btn.comets':      'View comets',
+      'solar.sim.headline':    'Real-time positions',
+      'solar.sim.tagline':     "Today's date · Kepler orbits · Drag to rotate",
+      'solar.ctrl.speed':      'Speed',
+      'solar.ctrl.scale':      'Scale',
+      'solar.ctrl.pause':      'Pause',
+      'solar.ctrl.resume':     'Resume',
+      'solar.date.label':      'Simulated date:',
+      'solar.comets.headline': 'Active comets',
+      'solar.comets.tagline':  'Real-time orbital elements from NASA/JPL',
+      'solar.comet.sma':       'Semi-major axis:',
+      'solar.comet.ecc':       'Eccentricity:',
+      'solar.comet.inc':       'Inclination:',
+      'solar.comet.per':       'Period:',
+      'solar.no-comets':       'No active comets found at this time.',
+      'solar.tooltip.dist':    'Distance to Sun:',
+      'solar.tooltip.per':     'Orbital period:',
+      'solar.tooltip.ecc':     'Eccentricity:',
+      'solar.days':            'days',
+    },
+  };
+
+  let currentLang = localStorage.getItem('sd-lang') || 'es';
+
+  window.T = key => (I18N[currentLang] || I18N.es)[key] || key;
+
+  window.applyLang = function(lang) {
+    currentLang = lang;
+    localStorage.setItem('sd-lang', lang);
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = window.T(el.dataset.i18n);
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      el.placeholder = window.T(el.dataset.i18nPlaceholder);
+    });
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('lang-btn--active', btn.dataset.lang === lang);
+    });
+    document.dispatchEvent(new CustomEvent('langchange', { detail: { lang } }));
+  };
+
+  document.addEventListener('DOMContentLoaded', () => applyLang(currentLang));
+  </script>
 
   {% block extra_scripts %}{% endblock %}
 </body>

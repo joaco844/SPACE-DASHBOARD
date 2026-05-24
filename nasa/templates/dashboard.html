@@ -51,9 +51,9 @@
 <section class="tile tile--light" id="asteroides">
   <div class="tile__inner">
     <p class="tile__label">Near Earth Objects</p>
-    <h2 class="tile__headline">Asteroides cercanos hoy</h2>
+    <h2 class="tile__headline" data-i18n="dashboard.asteroids.headline">Asteroides cercanos hoy</h2>
     <p class="tile__tagline">
-      {{ asteroides|length }} objeto{{ asteroides|length|pluralize }} detectado{{ asteroides|length|pluralize }} en las próximas 24 h
+      {{ asteroides|length }} <span data-i18n="dashboard.asteroids.suffix">objeto(s) detectado(s) en las próximas 24 h</span>
     </p>
 
     {% if asteroides %}
@@ -63,7 +63,8 @@
             <div class="asteroid-chip__header">
               <p class="asteroid-chip__name">{{ a.name }}</p>
               <div class="asteroid-chip__badges">
-                <span class="card__badge {% if a.is_potentially_hazardous_asteroid %}card__badge--danger{% endif %}">
+                <span class="card__badge {% if a.is_potentially_hazardous_asteroid %}card__badge--danger{% endif %}"
+                  {% if a.is_potentially_hazardous_asteroid %}data-i18n="badge.hazardous"{% else %}data-i18n="badge.safe"{% endif %}>
                   {% if a.is_potentially_hazardous_asteroid %}⚠ Peligroso{% else %}Seguro{% endif %}
                 </span>
                 {% if a.is_sentry_object %}
@@ -72,19 +73,19 @@
               </div>
             </div>
             <div class="asteroid-chip__body">
-              <p class="asteroid-chip__detail">Diám. {{ a.estimated_diameter.kilometers.estimated_diameter_min|floatformat:2 }}–{{ a.estimated_diameter.kilometers.estimated_diameter_max|floatformat:2 }} km</p>
+              <p class="asteroid-chip__detail"><span data-i18n="asteroid.diam">Diám.</span> {{ a.estimated_diameter.kilometers.estimated_diameter_min|floatformat:2 }}–{{ a.estimated_diameter.kilometers.estimated_diameter_max|floatformat:2 }} km</p>
               <p class="asteroid-chip__detail">Vel. {{ a.close_approach_data.0.relative_velocity.kilometers_per_hour|floatformat:0 }} km/h</p>
-              <p class="asteroid-chip__detail">{{ a.close_approach_data.0.miss_distance.kilometers|floatformat:0 }} km de distancia</p>
-              <p class="asteroid-chip__detail">{{ a.close_approach_data.0.miss_distance.lunar|floatformat:1 }} distancias lunares</p>
-              <p class="asteroid-chip__detail">Magnitud H: {{ a.absolute_magnitude_h }}</p>
-              <p class="asteroid-chip__detail">Máx. aproximación: {{ a.close_approach_data.0.close_approach_date_full }}</p>
+              <p class="asteroid-chip__detail">{{ a.close_approach_data.0.miss_distance.kilometers|floatformat:0 }} <span data-i18n="asteroid.dist">km de distancia</span></p>
+              <p class="asteroid-chip__detail">{{ a.close_approach_data.0.miss_distance.lunar|floatformat:1 }} <span data-i18n="asteroid.lunar">distancias lunares</span></p>
+              <p class="asteroid-chip__detail"><span data-i18n="asteroid.mag">Magnitud H:</span> {{ a.absolute_magnitude_h }}</p>
+              <p class="asteroid-chip__detail"><span data-i18n="asteroid.approach">Máx. aproximación:</span> {{ a.close_approach_data.0.close_approach_date_full }}</p>
             </div>
-            <a class="card__link asteroid-chip__link" href="{{ a.nasa_jpl_url }}" target="_blank" rel="noopener">Ver en JPL ↗</a>
+            <a class="card__link asteroid-chip__link" href="{{ a.nasa_jpl_url }}" target="_blank" rel="noopener" data-i18n="asteroid.jpl">Ver en JPL ↗</a>
           </div>
         {% endfor %}
       </div>
     {% else %}
-      <p class="state-empty">No hay datos de asteroides disponibles.</p>
+      <p class="state-empty" data-i18n="state.no-asteroids">No hay datos de asteroides disponibles.</p>
     {% endif %}
   </div>
 </section>
@@ -93,7 +94,7 @@
 <section class="tile tile--dark-2" id="marte">
   <div class="tile__inner">
     <p class="tile__label">Mars Rover — Curiosity</p>
-    <h2 class="tile__headline">Fotos desde Marte</h2>
+    <h2 class="tile__headline" data-i18n="dashboard.mars.headline">Fotos desde Marte</h2>
     <p class="tile__tagline">
       {% if fotos_marte %}Sol {{ fotos_marte.0.sol }} · {{ fotos_marte.0.earth_date }}{% else %}En tiempo real{% endif %}
     </p>
@@ -105,9 +106,9 @@
           {{ fotos_marte.0.rover.status|capfirst }}
         </span>
         <span class="rover-stats__sep">·</span>
-        <span class="rover-stats__item">{{ fotos_marte.0.rover.total_photos }} fotos totales</span>
+        <span class="rover-stats__item">{{ fotos_marte.0.rover.total_photos }} <span data-i18n="dashboard.mars.total">fotos totales</span></span>
         <span class="rover-stats__sep">·</span>
-        <span class="rover-stats__item">Aterrizaje: {{ fotos_marte.0.rover.landing_date }}</span>
+        <span class="rover-stats__item"><span data-i18n="dashboard.mars.landing">Aterrizaje:</span> {{ fotos_marte.0.rover.landing_date }}</span>
       </div>
       <div class="card-grid">
         {% for foto in fotos_marte %}
@@ -120,12 +121,12 @@
             />
             <p class="card__name">{{ foto.camera.full_name }}</p>
             <p class="card__meta">Sol {{ foto.sol }} · {{ foto.earth_date }}</p>
-            <a class="card__link" href="{{ foto.img_src }}" target="_blank" rel="noopener">Ver completa ↗</a>
+            <a class="card__link" href="{{ foto.img_src }}" target="_blank" rel="noopener" data-i18n="dashboard.mars.view">Ver completa ↗</a>
           </div>
         {% endfor %}
       </div>
     {% else %}
-      <p class="state-empty" style="color:var(--color-muted-on-dark);">No hay fotos disponibles.</p>
+      <p class="state-empty" style="color:var(--color-muted-on-dark);" data-i18n="state.no-photos">No hay fotos disponibles.</p>
     {% endif %}
   </div>
 </section>
@@ -134,7 +135,7 @@
 <section class="tile tile--parchment" id="tierra">
   <div class="tile__inner">
     <p class="tile__label">Earth Polychromatic Imaging Camera</p>
-    <h2 class="tile__headline">La Tierra, hoy</h2>
+    <h2 class="tile__headline" data-i18n="dashboard.epic.headline">La Tierra, hoy</h2>
     <p class="tile__tagline">
       {% if epic %}{{ epic.0.date|slice:":10" }}{% else %}Vista desde el punto L1{% endif %}
     </p>
@@ -162,10 +163,10 @@
       </p>
 
       <div class="btn-group">
-        <a class="btn btn--primary" href="https://epic.gsfc.nasa.gov" target="_blank" rel="noopener">Ver galería EPIC</a>
+        <a class="btn btn--primary" href="https://epic.gsfc.nasa.gov" target="_blank" rel="noopener" data-i18n="dashboard.epic.btn">Ver galería EPIC</a>
       </div>
     {% else %}
-      <p class="state-empty">No hay imagen EPIC disponible.</p>
+      <p class="state-empty" data-i18n="state.no-epic">No hay imagen EPIC disponible.</p>
     {% endif %}
   </div>
 </section>

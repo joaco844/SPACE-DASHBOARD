@@ -6,7 +6,7 @@
 {% block sub_nav_title %}Earth Data{% endblock %}
 
 {% block sub_nav_links %}
-<li><a href="/earth/">Clima</a></li>
+<li><a href="/earth/" data-i18n="subnav.weather">Clima</a></li>
 <li><a href="/earth/eonet/" style="opacity:1;font-weight:600;">EONET</a></li>
 {% endblock %}
 
@@ -21,8 +21,8 @@
 <section class="tile tile--dark" id="mapa">
   <div class="tile__inner">
     <p class="tile__label">NASA EONET · Últimos 30 días</p>
-    <h1 class="tile__headline">Eventos naturales activos</h1>
-    <p class="tile__tagline">{{ events|length }} evento{{ events|length|pluralize }} en curso</p>
+    <h1 class="tile__headline" data-i18n="eonet.headline">Eventos naturales activos</h1>
+    <p class="tile__tagline">{{ events|length }} <span data-i18n="eonet.tagline.suffix">evento(s) en curso</span></p>
 
     <!-- Leyenda de categorías -->
     <div class="eonet-legend">
@@ -44,11 +44,11 @@
 <section class="tile tile--light" id="eventos">
   <div class="tile__inner">
     <p class="tile__label">Eventos</p>
-    <h2 class="tile__headline">Todos los eventos</h2>
+    <h2 class="tile__headline" data-i18n="eonet.events.headline">Todos los eventos</h2>
 
     <!-- Filtros -->
     <div class="eonet-filters">
-      <button class="eonet-filter-btn eonet-filter-btn--active" data-filter="all" onclick="filterEvents('all', this)">
+      <button class="eonet-filter-btn eonet-filter-btn--active" data-filter="all" onclick="filterEvents('all', this)" data-i18n="eonet.filter.all">
         Todos
       </button>
       {% for cat_id, cat_label in categories %}
@@ -70,12 +70,12 @@
             <p class="eonet-card__title">{{ e.title }}</p>
             <p class="eonet-card__meta">{{ e.date }}</p>
             <p class="eonet-card__coords">{{ e.lat|floatformat:2 }}°, {{ e.lon|floatformat:2 }}°</p>
-            <button class="card__link eonet-card__map-btn" onclick="flyToEvent({{ e.lat }}, {{ e.lon }})">Ver en mapa ↗</button>
+            <button class="card__link eonet-card__map-btn" onclick="flyToEvent({{ e.lat }}, {{ e.lon }})" data-i18n="eonet.map.btn">Ver en mapa ↗</button>
           </div>
         {% endfor %}
       </div>
     {% else %}
-      <p class="state-empty">No hay eventos activos disponibles.</p>
+      <p class="state-empty" data-i18n="state.no-events">No hay eventos activos disponibles.</p>
     {% endif %}
   </div>
 </section>

@@ -6,9 +6,9 @@
 {% block sub_nav_title %}Mission Planner{% endblock %}
 
 {% block sub_nav_links %}
-<li><a href="#trayectoria">Trayectoria</a></li>
-<li><a href="#ventanas">Ventanas</a></li>
-<li><a href="#simulador">Simulador</a></li>
+<li><a href="#trayectoria" data-i18n="subnav.trajectory">Trayectoria</a></li>
+<li><a href="#ventanas" data-i18n="subnav.windows">Ventanas</a></li>
+<li><a href="#simulador" data-i18n="subnav.simulator">Simulador</a></li>
 {% endblock %}
 
 {% block content %}
@@ -18,10 +18,10 @@
   <div class="tile__inner">
     <p class="tile__label">Mission Planner</p>
     <h1 class="tile__headline">Space Mission Planner</h1>
-    <p class="tile__tagline">Planificá tu viaje al cosmos con física real</p>
+    <p class="tile__tagline" data-i18n="mission.tagline">Planificá tu viaje al cosmos con física real</p>
     <div class="btn-group">
-      <a href="#trayectoria" class="btn btn--primary">Calcular trayectoria</a>
-      <a href="#ventanas" class="btn btn--ghost" style="color:#2997ff;border-color:#2997ff;">Ver ventanas</a>
+      <a href="#trayectoria" class="btn btn--primary" data-i18n="mission.btn.calc">Calcular trayectoria</a>
+      <a href="#ventanas" class="btn btn--ghost" style="color:#2997ff;border-color:#2997ff;" data-i18n="mission.btn.windows">Ver ventanas</a>
     </div>
   </div>
 </section>
@@ -29,16 +29,16 @@
 <!-- Trajectory Calculator -->
 <section class="tile tile--light" id="trayectoria">
   <div class="tile__inner">
-    <p class="tile__label">Trayectorias</p>
-    <h2 class="tile__headline">Calculadora de trayectoria</h2>
-    <p class="tile__tagline">Destino, tipo de misión y fecha de lanzamiento</p>
+    <p class="tile__label" data-i18n="mission.calc.label">Trayectorias</p>
+    <h2 class="tile__headline" data-i18n="mission.calc.headline">Calculadora de trayectoria</h2>
+    <p class="tile__tagline" data-i18n="mission.calc.tagline">Destino, tipo de misión y fecha de lanzamiento</p>
 
     <div class="mission-calc-layout">
 
       <!-- Form -->
       <div class="mission-form">
         <div class="mission-field">
-          <label class="mission-field__label" for="dest-select">Destino</label>
+          <label class="mission-field__label" for="dest-select" data-i18n="mission.field.dest">Destino</label>
           <select class="mission-field__select" id="dest-select">
             <option value="moon">🌕  Luna</option>
             <option value="mars" selected>🔴  Marte</option>
@@ -48,7 +48,7 @@
           </select>
         </div>
         <div class="mission-field">
-          <label class="mission-field__label" for="mission-type">Tipo de misión</label>
+          <label class="mission-field__label" for="mission-type" data-i18n="mission.field.type">Tipo de misión</label>
           <select class="mission-field__select" id="mission-type">
             <option value="flyby">Flyby (pasada)</option>
             <option value="orbit" selected>Inserción orbital</option>
@@ -56,14 +56,14 @@
           </select>
         </div>
         <div class="mission-field">
-          <label class="mission-field__label" for="launch-date">Fecha de lanzamiento</label>
+          <label class="mission-field__label" for="launch-date" data-i18n="mission.field.date">Fecha de lanzamiento</label>
           <input class="mission-field__input" type="date" id="launch-date" />
         </div>
         <div class="mission-field">
-          <label class="mission-field__label" for="rocket-mass">Masa del cohete (toneladas)</label>
+          <label class="mission-field__label" for="rocket-mass" data-i18n="mission.field.mass">Masa del cohete (toneladas)</label>
           <input class="mission-field__input" type="number" id="rocket-mass" value="500" min="10" max="50000" />
         </div>
-        <button class="btn btn--primary" onclick="calcularTrayectoria()" style="align-self:flex-start;">
+        <button class="btn btn--primary" onclick="calcularTrayectoria()" style="align-self:flex-start;" data-i18n="mission.btn.calculate">
           Calcular misión
         </button>
       </div>
@@ -72,26 +72,26 @@
       <div class="mission-results-wrap">
         <div id="mission-placeholder" class="mission-results__placeholder">
           <div style="font-size:48px;margin-bottom:16px;">🚀</div>
-          <div>Completá el formulario y presioná<br><strong>Calcular misión</strong></div>
+          <div><span data-i18n="mission.placeholder.text">Completá el formulario y presioná</span><br><strong data-i18n="mission.placeholder.action">Calcular misión</strong></div>
         </div>
         <div id="mission-results" class="mission-results mission-results--hidden">
           <div id="res-badge" class="mission-destination-badge"></div>
           <div class="mission-stat-grid">
             <div class="mission-stat">
               <div class="mission-stat__value" id="res-time">—</div>
-              <div class="mission-stat__label">Duración del viaje</div>
+              <div class="mission-stat__label" data-i18n="mission.result.time">Duración del viaje</div>
             </div>
             <div class="mission-stat">
               <div class="mission-stat__value" id="res-arrival">—</div>
-              <div class="mission-stat__label">Llegada estimada</div>
+              <div class="mission-stat__label" data-i18n="mission.result.arrival">Llegada estimada</div>
             </div>
             <div class="mission-stat">
               <div class="mission-stat__value" id="res-deltav">—</div>
-              <div class="mission-stat__label">Delta-V total</div>
+              <div class="mission-stat__label" data-i18n="mission.result.deltav">Delta-V total</div>
             </div>
             <div class="mission-stat">
               <div class="mission-stat__value" id="res-fuel">—</div>
-              <div class="mission-stat__label">Combustible estimado</div>
+              <div class="mission-stat__label" data-i18n="mission.result.fuel">Combustible estimado</div>
             </div>
           </div>
           <p id="res-note" class="mission-result-note"></p>
@@ -106,10 +106,10 @@
 <section class="tile tile--dark" id="ventanas">
   <div class="tile__inner">
     <p class="tile__label">Launch Windows</p>
-    <h2 class="tile__headline">Ventanas de lanzamiento a Marte</h2>
-    <p class="tile__tagline">Las alineaciones óptimas ocurren cada ~26 meses</p>
+    <h2 class="tile__headline" data-i18n="mission.windows.headline">Ventanas de lanzamiento a Marte</h2>
+    <p class="tile__tagline" data-i18n="mission.windows.tagline">Las alineaciones óptimas ocurren cada ~26 meses</p>
     <div class="launch-windows-grid" id="launch-windows-grid"></div>
-    <p style="font-size:13px;color:var(--color-muted-on-dark);opacity:0.45;margin-top:var(--space-xl);text-align:left;">
+    <p style="font-size:13px;color:var(--color-muted-on-dark);opacity:0.45;margin-top:var(--space-xl);text-align:left;" data-i18n="mission.windows.note">
       Calculado usando el período sinódico de Marte (779.94 días). Las ventanas están centradas en la oposición Tierra–Marte.
     </p>
   </div>
@@ -119,28 +119,28 @@
 <section class="tile tile--parchment" id="simulador">
   <div class="tile__inner">
     <p class="tile__label">Simulador</p>
-    <h2 class="tile__headline">Simulador de misión a Marte</h2>
-    <p class="tile__tagline">Recorrido paso a paso de un viaje real</p>
+    <h2 class="tile__headline" data-i18n="mission.sim.headline">Simulador de misión a Marte</h2>
+    <p class="tile__tagline" data-i18n="mission.sim.tagline">Recorrido paso a paso de un viaje real</p>
 
     <div class="mission-sim-layout">
 
       <!-- Stats + controls -->
       <div>
         <p style="font-size:17px;color:var(--color-ink-muted-80);line-height:1.55;margin-bottom:var(--space-xl);">
-          Una misión tripulada a Marte involucra múltiples fases críticas. Este simulador muestra el perfil completo basado en la próxima ventana de lanzamiento disponible.
+          <span data-i18n="mission.sim.desc">Una misión tripulada a Marte involucra múltiples fases críticas. Este simulador muestra el perfil completo basado en la próxima ventana de lanzamiento disponible.</span>
         </p>
         <div class="mission-sim-stats">
           <div class="mission-stat">
             <div class="mission-stat__value" id="sim-launch">—</div>
-            <div class="mission-stat__label">Fecha de lanzamiento</div>
+            <div class="mission-stat__label" data-i18n="mission.sim.launch-label">Fecha de lanzamiento</div>
           </div>
           <div class="mission-stat">
             <div class="mission-stat__value" id="sim-arrival">—</div>
-            <div class="mission-stat__label">Llegada a Marte</div>
+            <div class="mission-stat__label" data-i18n="mission.sim.arrival-label">Llegada a Marte</div>
           </div>
           <div class="mission-stat">
             <div class="mission-stat__value">259 <span class="mission-stat__unit">días</span></div>
-            <div class="mission-stat__label">Transferencia Hohmann</div>
+            <div class="mission-stat__label" data-i18n="mission.sim.transfer">Transferencia Hohmann</div>
           </div>
         </div>
 
@@ -155,8 +155,8 @@
         </div>
 
         <div class="btn-group" style="justify-content:flex-start;margin-top:var(--space-lg);">
-          <button class="btn btn--primary" id="sim-btn" onclick="iniciarSimulador()">Iniciar simulación</button>
-          <button class="btn btn--ghost" onclick="resetSimulador()">Resetear</button>
+          <button class="btn btn--primary" id="sim-btn" onclick="iniciarSimulador()" data-i18n="mission.sim.start">Iniciar simulación</button>
+          <button class="btn btn--ghost" onclick="resetSimulador()" data-i18n="mission.sim.reset">Resetear</button>
         </div>
       </div>
 
@@ -261,22 +261,23 @@ function renderLaunchWindows() {
 
     let statusHtml = '', countdownHtml = '';
 
+    const T = window.T || (k => k);
     if (isOpen) {
-      statusHtml   = `<span class="launch-window-card__status launch-window-card__status--open">● Abierta ahora</span>`;
-      countdownHtml= `<div class="launch-window-card__countdown">${daysClose}</div><div class="launch-window-card__countdown-label">días restantes</div>`;
+      statusHtml   = `<span class="launch-window-card__status launch-window-card__status--open">${T('window.open')}</span>`;
+      countdownHtml= `<div class="launch-window-card__countdown">${daysClose}</div><div class="launch-window-card__countdown-label">${T('window.days-left')}</div>`;
     } else if (isPast) {
-      statusHtml   = `<span class="launch-window-card__status launch-window-card__status--past">Cerrada</span>`;
+      statusHtml   = `<span class="launch-window-card__status launch-window-card__status--past">${T('window.closed')}</span>`;
     } else {
-      statusHtml   = `<span class="launch-window-card__status launch-window-card__status--soon">Próxima</span>`;
-      countdownHtml= `<div class="launch-window-card__countdown">${daysOpen}</div><div class="launch-window-card__countdown-label">días para apertura</div>`;
+      statusHtml   = `<span class="launch-window-card__status launch-window-card__status--soon">${T('window.upcoming')}</span>`;
+      countdownHtml= `<div class="launch-window-card__countdown">${daysOpen}</div><div class="launch-window-card__countdown-label">${T('window.days-open')}</div>`;
     }
 
     return `
       <div class="launch-window-card ${isOpen ? 'launch-window-card--active' : ''}">
         ${statusHtml}
         <div class="launch-window-card__dates">${fmt(w.open)}<br>→ ${fmt(w.close)}</div>
-        <div class="launch-window-card__detail">Oposición: ${fmt(w.oppDate)}</div>
-        <div class="launch-window-card__detail">Llegada: ${fmt(w.arrival)}</div>
+        <div class="launch-window-card__detail">${T('window.opposition')} ${fmt(w.oppDate)}</div>
+        <div class="launch-window-card__detail">${T('window.arrival')} ${fmt(w.arrival)}</div>
         ${countdownHtml}
       </div>`;
   }).join('');
@@ -297,6 +298,7 @@ let simInterval = null;
 let simStep     = -1;
 
 function renderTimeline() {
+  const T = window.T || (k => k);
   document.getElementById('mission-timeline').innerHTML = PHASES.map((p, i) => `
     <div class="mission-phase" id="ph-${i}">
       <div class="mission-phase__track">
@@ -305,8 +307,8 @@ function renderTimeline() {
       </div>
       <div class="mission-phase__content">
         <div class="mission-phase__time">${p.time}</div>
-        <div class="mission-phase__name">${p.name}</div>
-        <div class="mission-phase__desc">${p.desc}</div>
+        <div class="mission-phase__name">${T('phase.' + i + '.name')}</div>
+        <div class="mission-phase__desc">${T('phase.' + i + '.desc')}</div>
       </div>
     </div>`).join('');
 }
@@ -340,13 +342,14 @@ function iniciarSimulador() {
   simStep = 0;
   activatePhase(simStep);
   const btn = document.getElementById('sim-btn');
-  btn.textContent = 'Simulando…';
+  const T = window.T || (k => k);
+  btn.textContent = T('mission.sim.running');
   btn.disabled    = true;
   simInterval = setInterval(() => {
     simStep++;
     if (simStep >= PHASES.length) {
       clearInterval(simInterval); simInterval = null;
-      btn.textContent = 'Misión completada ✓';
+      btn.textContent = T('mission.sim.done');
       return;
     }
     activatePhase(simStep);
@@ -358,7 +361,7 @@ function resetSimulador() {
   simStep = -1;
   activatePhase(-1);
   const btn = document.getElementById('sim-btn');
-  btn.textContent = 'Iniciar simulación';
+  btn.textContent = (window.T || (k => k))('mission.sim.start');
   btn.disabled    = false;
 }
 
@@ -373,6 +376,14 @@ document.addEventListener('DOMContentLoaded', () => {
   renderLaunchWindows();
   renderTimeline();
   setSimDates();
+});
+
+document.addEventListener('langchange', () => {
+  renderLaunchWindows();
+  renderTimeline();
+  const T = window.T || (k => k);
+  const lbl = document.getElementById('sim-phase-label');
+  if (lbl && simStep < 0) lbl.textContent = T('mission.sim.ready');
 });
 </script>
 {% endblock %}

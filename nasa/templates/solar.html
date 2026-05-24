@@ -6,8 +6,8 @@
 {% block sub_nav_title %}Solar System{% endblock %}
 
 {% block sub_nav_links %}
-<li><a href="#simulador">Simulador</a></li>
-<li><a href="#cometas">Cometas</a></li>
+<li><a href="#simulador" data-i18n="subnav.simulator">Simulador</a></li>
+<li><a href="#cometas" data-i18n="subnav.comets">Cometas</a></li>
 {% endblock %}
 
 {% block extra_head %}
@@ -27,11 +27,11 @@
 <section class="tile tile--dark">
   <div class="tile__inner">
     <p class="tile__label">Solar System</p>
-    <h1 class="tile__headline">Sistema Solar en 3D</h1>
-    <p class="tile__tagline">Planetas y cometas activos con órbitas reales</p>
+    <h1 class="tile__headline" data-i18n="solar.headline">Sistema Solar en 3D</h1>
+    <p class="tile__tagline" data-i18n="solar.tagline">Planetas y cometas activos con órbitas reales</p>
     <div class="btn-group">
-      <a href="#simulador" class="btn btn--primary">Ver simulador</a>
-      <a href="#cometas" class="btn btn--ghost" style="color:#2997ff;border-color:#2997ff;">Ver cometas</a>
+      <a href="#simulador" class="btn btn--primary" data-i18n="solar.btn.sim">Ver simulador</a>
+      <a href="#cometas" class="btn btn--ghost" style="color:#2997ff;border-color:#2997ff;" data-i18n="solar.btn.comets">Ver cometas</a>
     </div>
   </div>
 </section>
@@ -40,8 +40,8 @@
 <section class="tile tile--dark-2" id="simulador" style="padding-bottom: var(--space-section);">
   <div class="tile__inner">
     <p class="tile__label">Simulador 3D</p>
-    <h2 class="tile__headline">Posiciones en tiempo real</h2>
-    <p class="tile__tagline" style="margin-bottom: var(--space-xl);">Fecha de hoy · Órbitas de Kepler · Arrastrá para rotar</p>
+    <h2 class="tile__headline" data-i18n="solar.sim.headline">Posiciones en tiempo real</h2>
+    <p class="tile__tagline" style="margin-bottom: var(--space-xl);" data-i18n="solar.sim.tagline">Fecha de hoy · Órbitas de Kepler · Arrastrá para rotar</p>
 
     <!-- Canvas -->
     <div class="solar-canvas-wrap">
@@ -50,32 +50,32 @@
       <!-- Tooltip -->
       <div class="solar-tooltip" id="solar-tooltip">
         <div class="solar-tooltip__name" id="tt-name">—</div>
-        <div class="solar-tooltip__row">Distancia al Sol: <span id="tt-dist">—</span></div>
-        <div class="solar-tooltip__row">Período orbital: <span id="tt-per">—</span></div>
-        <div class="solar-tooltip__row" id="tt-extra-row" style="display:none;">Excentricidad: <span id="tt-ecc">—</span></div>
+        <div class="solar-tooltip__row"><span data-i18n="solar.tooltip.dist">Distancia al Sol:</span> <span id="tt-dist">—</span></div>
+        <div class="solar-tooltip__row"><span data-i18n="solar.tooltip.per">Período orbital:</span> <span id="tt-per">—</span></div>
+        <div class="solar-tooltip__row" id="tt-extra-row" style="display:none;"><span data-i18n="solar.tooltip.ecc">Excentricidad:</span> <span id="tt-ecc">—</span></div>
       </div>
 
       <!-- Controls -->
       <div class="solar-controls">
         <div class="solar-ctrl-group">
-          <span class="solar-ctrl-label">Velocidad</span>
+          <span class="solar-ctrl-label" data-i18n="solar.ctrl.speed">Velocidad</span>
           <input type="range" class="solar-slider" id="speed-slider" min="0" max="100" value="20">
           <span class="solar-ctrl-value" id="speed-val">20</span>
         </div>
         <div class="solar-ctrl-sep"></div>
         <div class="solar-ctrl-group">
-          <span class="solar-ctrl-label">Escala</span>
+          <span class="solar-ctrl-label" data-i18n="solar.ctrl.scale">Escala</span>
           <button class="solar-scale-btn solar-scale-btn--active" id="btn-log" onclick="setScale('log')">Log</button>
           <button class="solar-scale-btn" id="btn-lin" onclick="setScale('lin')">Lineal</button>
         </div>
         <div class="solar-ctrl-sep"></div>
-        <button class="solar-play-btn" id="play-btn" onclick="togglePlay()">Pausar</button>
+        <button class="solar-play-btn" id="play-btn" onclick="togglePlay()" data-i18n="solar.ctrl.pause">Pausar</button>
       </div>
     </div>
 
     <!-- Date display -->
     <p style="margin-top:var(--space-lg);font-size:14px;color:var(--color-muted-on-dark);letter-spacing:-0.224px;">
-      Fecha simulada: <strong id="sim-date" style="color:var(--color-on-dark);"></strong>
+      <span data-i18n="solar.date.label">Fecha simulada:</span> <strong id="sim-date" style="color:var(--color-on-dark);"></strong>
     </p>
 
   </div>
@@ -85,8 +85,8 @@
 <section class="tile tile--dark" id="cometas">
   <div class="tile__inner">
     <p class="tile__label">JPL Small Body Database</p>
-    <h2 class="tile__headline">Cometas activos</h2>
-    <p class="tile__tagline">Elementos orbitales en tiempo real desde NASA/JPL</p>
+    <h2 class="tile__headline" data-i18n="solar.comets.headline">Cometas activos</h2>
+    <p class="tile__tagline" data-i18n="solar.comets.tagline">Elementos orbitales en tiempo real desde NASA/JPL</p>
     <div class="solar-comet-grid" id="comet-grid">
       <div class="state-loading" style="color:var(--color-muted-on-dark);">Cargando cometas…</div>
     </div>
@@ -467,7 +467,7 @@ speedSlider.addEventListener('input', () => {
 
 window.togglePlay = function() {
   playing = !playing;
-  playBtn.textContent = playing ? 'Pausar' : 'Reanudar';
+  playBtn.textContent = playing ? window.T('solar.ctrl.pause') : window.T('solar.ctrl.resume');
 };
 
 window.setScale = function(mode) {
@@ -503,21 +503,30 @@ animate();
 } // end else (WebGL available)
 
 // ── Render comet cards (always, WebGL or not) ─────────────────
-(function renderCometCards() {
+function renderCometCards() {
   const grid = document.getElementById('comet-grid');
   if (!COMETS_RAW.length) {
-    grid.innerHTML = '<p style="color:var(--color-muted-on-dark);font-size:14px;">No se encontraron cometas activos en este momento.</p>';
+    grid.innerHTML = `<p style="color:var(--color-muted-on-dark);font-size:14px;">${window.T('solar.no-comets')}</p>`;
     return;
   }
   grid.innerHTML = COMETS_RAW.map(c => `
     <div class="solar-comet-card">
       <div class="solar-comet-card__name">${c.name || '—'}</div>
-      <div class="solar-comet-card__row">Semi-eje mayor: <span>${c.a.toFixed(3)} AU</span></div>
-      <div class="solar-comet-card__row">Excentricidad: <span>${c.e.toFixed(4)}</span></div>
-      <div class="solar-comet-card__row">Inclinación: <span>${c.i.toFixed(2)}°</span></div>
-      <div class="solar-comet-card__row">Período: <span>${c.per > 0 ? c.per.toFixed(0) + ' días' : '—'}</span></div>
+      <div class="solar-comet-card__row">${window.T('solar.comet.sma')} <span>${c.a.toFixed(3)} AU</span></div>
+      <div class="solar-comet-card__row">${window.T('solar.comet.ecc')} <span>${c.e.toFixed(4)}</span></div>
+      <div class="solar-comet-card__row">${window.T('solar.comet.inc')} <span>${c.i.toFixed(2)}°</span></div>
+      <div class="solar-comet-card__row">${window.T('solar.comet.per')} <span>${c.per > 0 ? c.per.toFixed(0) + ' ' + window.T('solar.days') : '—'}</span></div>
     </div>`).join('');
-})();
+}
+renderCometCards();
+
+document.addEventListener('langchange', () => {
+  renderCometCards();
+  if (typeof playing !== 'undefined') {
+    document.getElementById('play-btn').textContent =
+      playing ? window.T('solar.ctrl.pause') : window.T('solar.ctrl.resume');
+  }
+});
 
 </script>
 {% endblock %}

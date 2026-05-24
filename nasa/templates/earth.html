@@ -6,7 +6,7 @@
 {% block sub_nav_title %}Earth Data{% endblock %}
 
 {% block sub_nav_links %}
-<li><a href="/earth/" style="opacity:1;font-weight:600;">Clima</a></li>
+<li><a href="/earth/" style="opacity:1;font-weight:600;" data-i18n="subnav.weather">Clima</a></li>
 <li><a href="/earth/eonet/">EONET</a></li>
 {% endblock %}
 
@@ -25,14 +25,14 @@
   <div class="tile__inner">
     <p class="tile__label">NASA Earthdata · GIBS</p>
     <h1 class="tile__headline">Climate Change</h1>
-    <p class="tile__tagline">Visualización global interactiva</p>
+    <p class="tile__tagline" data-i18n="earth.tagline">Visualización global interactiva</p>
 
     <!-- Controles de capa -->
     <div class="earth-layer-controls">
-      <button class="earth-layer-btn earth-layer-btn--active" data-layer="temp" onclick="switchLayer('temp')">
+      <button class="earth-layer-btn earth-layer-btn--active" data-layer="temp" onclick="switchLayer('temp')" data-i18n="earth.temp">
         🌡 Temperatura
       </button>
-      <button class="earth-layer-btn" data-layer="ice" onclick="switchLayer('ice')">
+      <button class="earth-layer-btn" data-layer="ice" onclick="switchLayer('ice')" data-i18n="earth.ice">
         🧊 Hielo Polar
       </button>
     </div>
@@ -70,14 +70,14 @@
 <section class="tile tile--light" id="co2">
   <div class="tile__inner">
     <p class="tile__label">NOAA · Mauna Loa</p>
-    <h2 class="tile__headline">CO₂ atmosférico</h2>
-    <p class="tile__tagline">Concentración histórica en partes por millón</p>
+    <h2 class="tile__headline" data-i18n="earth.co2.headline">CO₂ atmosférico</h2>
+    <p class="tile__tagline" data-i18n="earth.co2.tagline">Concentración histórica en partes por millón</p>
 
     <div class="co2-chart-container">
       <canvas id="co2Chart"></canvas>
     </div>
 
-    <p class="co2-note">
+    <p class="co2-note" data-i18n="earth.co2.note">
       Datos: NOAA Global Monitoring Laboratory — Mauna Loa Observatory.
       Registro continuo desde 1958.
     </p>
@@ -87,25 +87,25 @@
 <!-- ── Stats clave ──────────────────────────────────────────── -->
 <section class="tile tile--parchment" id="hielo">
   <div class="tile__inner">
-    <p class="tile__label">Indicadores clave</p>
-    <h2 class="tile__headline">El planeta en números</h2>
-    <p class="tile__tagline">Datos actualizados por NASA y NOAA</p>
+    <p class="tile__label" data-i18n="earth.stats.label">Indicadores clave</p>
+    <h2 class="tile__headline" data-i18n="earth.stats.headline">El planeta en números</h2>
+    <p class="tile__tagline" data-i18n="earth.stats.tagline">Datos actualizados por NASA y NOAA</p>
 
     <div class="climate-stats-grid">
       <div class="climate-stat">
         <p class="climate-stat__value">422 <span class="climate-stat__unit">ppm</span></p>
-        <p class="climate-stat__label">CO₂ actual</p>
-        <p class="climate-stat__sub">+50% vs era pre-industrial</p>
+        <p class="climate-stat__label" data-i18n="earth.stats.co2.label">CO₂ actual</p>
+        <p class="climate-stat__sub" data-i18n="earth.stats.co2.sub">+50% vs era pre-industrial</p>
       </div>
       <div class="climate-stat">
         <p class="climate-stat__value">+1.2 <span class="climate-stat__unit">°C</span></p>
-        <p class="climate-stat__label">Temperatura global</p>
-        <p class="climate-stat__sub">Anomalía vs promedio 1951–1980</p>
+        <p class="climate-stat__label" data-i18n="earth.stats.temp.label">Temperatura global</p>
+        <p class="climate-stat__sub" data-i18n="earth.stats.temp.sub">Anomalía vs promedio 1951–1980</p>
       </div>
       <div class="climate-stat">
         <p class="climate-stat__value">−13 <span class="climate-stat__unit">%</span></p>
-        <p class="climate-stat__label">Hielo ártico</p>
-        <p class="climate-stat__sub">Reducción por década desde 1979</p>
+        <p class="climate-stat__label" data-i18n="earth.stats.ice.label">Hielo ártico</p>
+        <p class="climate-stat__sub" data-i18n="earth.stats.ice.sub">Reducción por década desde 1979</p>
       </div>
     </div>
   </div>

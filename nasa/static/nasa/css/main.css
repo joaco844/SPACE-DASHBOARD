@@ -1751,6 +1751,41 @@ video.apod-embed {
   .launch-windows-grid { grid-template-columns: 1fr; }
 }
 
+/* ── Language switch ────────────────────────────────────────── */
+.lang-switch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 16px;
+}
+
+.lang-btn {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.45);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 7px;
+  border-radius: var(--radius-xs);
+  transition: color 0.15s, background 0.15s;
+}
+
+.lang-btn:hover { color: rgba(255, 255, 255, 0.8); }
+
+.lang-btn--active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.lang-sep {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
 /* ── Solar System ───────────────────────────────────────────── */
 .solar-canvas-wrap {
   position: relative;

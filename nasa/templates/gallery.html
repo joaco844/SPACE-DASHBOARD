@@ -14,9 +14,9 @@
   <aside class="gallery-sidebar">
 
     <div class="gallery-sidebar__section">
-      <p class="gallery-sidebar__heading">Favoritos</p>
+      <p class="gallery-sidebar__heading" data-i18n="gallery.favorites">Favoritos</p>
       <div id="favsList">
-        <p class="gallery-sidebar__empty">Sin favoritos aún.</p>
+        <p class="gallery-sidebar__empty" data-i18n="gallery.no-favorites">Sin favoritos aún.</p>
       </div>
     </div>
 
@@ -25,10 +25,10 @@
     <div class="gallery-sidebar__section">
       <div class="gallery-sidebar__heading-row">
         <p class="gallery-sidebar__heading">Playlists</p>
-        <button class="gallery-sidebar__new-btn" onclick="createPlaylist()">+ Nueva</button>
+        <button class="gallery-sidebar__new-btn" onclick="createPlaylist()" data-i18n="gallery.new-playlist">+ Nueva</button>
       </div>
       <div id="playlistsList">
-        <p class="gallery-sidebar__empty">Sin playlists aún.</p>
+        <p class="gallery-sidebar__empty" data-i18n="gallery.no-playlists">Sin playlists aún.</p>
       </div>
     </div>
 
@@ -46,22 +46,22 @@
         class="gallery-search-input"
         id="searchInput"
         type="text"
-        placeholder="Buscar en el universo..."
+        placeholder="Buscar en el universo..." data-i18n-placeholder="gallery.search.placeholder"
         onkeydown="if(event.key==='Enter') search()"
       />
-      <button class="gallery-search-btn" onclick="search()">Buscar</button>
+      <button class="gallery-search-btn" onclick="search()" data-i18n="gallery.search.btn">Buscar</button>
     </div>
 
     <!-- Topics rápidos -->
     <div class="gallery-topics">
-      <button class="gallery-topic-btn" onclick="quickSearch('galaxies')">Galaxias</button>
-      <button class="gallery-topic-btn" onclick="quickSearch('Mars')">Marte</button>
+      <button class="gallery-topic-btn" onclick="quickSearch('galaxies')" data-i18n="gallery.topic.galaxies">Galaxias</button>
+      <button class="gallery-topic-btn" onclick="quickSearch('Mars')" data-i18n="gallery.topic.mars">Marte</button>
       <button class="gallery-topic-btn" onclick="quickSearch('ISS')">ISS</button>
       <button class="gallery-topic-btn" onclick="quickSearch('Hubble')">Hubble</button>
-      <button class="gallery-topic-btn" onclick="quickSearch('nebula')">Nebulosas</button>
-      <button class="gallery-topic-btn" onclick="quickSearch('black hole')">Agujeros negros</button>
+      <button class="gallery-topic-btn" onclick="quickSearch('nebula')" data-i18n="gallery.topic.nebulas">Nebulosas</button>
+      <button class="gallery-topic-btn" onclick="quickSearch('black hole')" data-i18n="gallery.topic.blackholes">Agujeros negros</button>
       <button class="gallery-topic-btn" onclick="quickSearch('Apollo')">Apollo</button>
-      <button class="gallery-topic-btn" onclick="quickSearch('Earth')">Tierra</button>
+      <button class="gallery-topic-btn" onclick="quickSearch('Earth')" data-i18n="gallery.topic.earth">Tierra</button>
     </div>
 
     <!-- Estado -->
