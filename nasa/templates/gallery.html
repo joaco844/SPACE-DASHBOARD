@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Space Gallery{% endblock %}
+
+{% block sub_nav_title %}Space Gallery{% endblock %}
+{% block sub_nav_links %}{% endblock %}
+
+{% block content %}
+
+<div class="gallery-layout">
+
+  <!-- ── Sidebar ──────────────────────────────────────────── -->
+  <aside class="gallery-sidebar">
+
+    <div class="gallery-sidebar__section">
+      <p class="gallery-sidebar__heading">Favoritos</p>
+      <div id="favsList">
+        <p class="gallery-sidebar__empty">Sin favoritos aún.</p>
+      </div>
+    </div>
+
+    <div class="gallery-sidebar__divider"></div>
+
+    <div class="gallery-sidebar__section">
+      <div class="gallery-sidebar__heading-row">
+        <p class="gallery-sidebar__heading">Playlists</p>
+        <button class="gallery-sidebar__new-btn" onclick="createPlaylist()">+ Nueva</button>
+      </div>
+      <div id="playlistsList">
+        <p class="gallery-sidebar__empty">Sin playlists aún.</p>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── Main ─────────────────────────────────────────────── -->
+  <div class="gallery-main">
+
+    <!-- Buscador -->
+    <div class="gallery-search-bar">
+      <svg class="gallery-search-icon" viewBox="0 0 24 24">
+        <path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+      <input
+        class="gallery-search-input"
+        id="searchInput"
+        type="text"
+        placeholder="Buscar en el universo..."
+        onkeydown="if(event.key==='Enter') search()"
+      />
+      <button class="gallery-search-btn" onclick="search()">Buscar</button>
+    </div>
+
+    <!-- Topics rápidos -->
+    <div class="gallery-topics">
+      <button class="gallery-topic-btn" onclick="quickSearch('galaxies')">Galaxias</button>
+      <button class="gallery-topic-btn" onclick="quickSearch('Mars')">Marte</button>
+      <button class="gallery-topic-btn" onclick="quickSearch('ISS')">ISS</button>
+      <button class="gallery-topic-btn" onclick="quickSearch('Hubble')">Hubble</button>
+      <button class="gallery-topic-btn" onclick="quickSearch('nebula')">Nebulosas</button>
+      <button class="gallery-topic-btn" onclick="quickSearch('black hole')">Agujeros negros</button>
+      <button class="gallery-topic-btn" onclick="quickSearch('Apollo')">Apollo</button>
+      <button class="gallery-topic-btn" onclick="quickSearch('Earth')">Tierra</button>
+    </div>
+
+    <!-- Estado -->
+    <div id="galleryStatus" class="gallery-status gallery-status--hidden"></div>
+
+    <!-- Grid de resultados -->
+    <div class="gallery-grid" id="galleryGrid"></div>
+
+  </div>
+</div>
+
+<!-- Modal lightbox -->
+<div class="gallery-modal" id="galleryModal" onclick="handleModalClick(event)">
+  <div class="gallery-modal__inner">
+    <button class="gallery-modal__close" onclick="closeModal()">✕</button>
+    <img class="gallery-modal__img" id="modalImg" src="" alt="" />
+    <video class="gallery-modal__img gallery-modal__video" id="modalVideo" controls style="display:none"></video>
+    <div class="gallery-modal__info">
+      <p class="gallery-modal__title" id="modalTitle"></p>
+      <p class="gallery-modal__date"  id="modalDate"></p>
+      <p class="gallery-modal__desc"  id="modalDesc"></p>
+    </div>
+  </div>
+</div>
+
+<!-- Playlist dropdown -->
+<div class="playlist-menu" id="playlistMenu" style="display:none"></div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ── Estado ────────────────────────────────────────────────────
+let favorites  = JSON.parse(localStorage.getItem('gallery_favorites')  || '[]');
+let playlists  = JSON.parse(localStorage.getItem('gallery_playlists')  || '[]');
+const itemCache = new Map();
+
+// ── Helpers ───────────────────────────────────────────────────
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function saveFavs()   { localStorage.setItem('gallery_favorites', JSON.stringify(favorites)); }
+function saveLists()  { localStorage.setItem('gallery_playlists', JSON.stringify(playlists)); }
+
+// ── Búsqueda ──────────────────────────────────────────────────
+async function search() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  setStatus('loading', 'Buscando...');
+  clearGrid();
+
+  try {
+    const url = `https://images-api.nasa.gov/search?q=${encodeURIComponent(q)}&media_type=image,video&page_size=40`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    const items = data?.collection?.items || [];
+
+    if (items.length === 0) {
+      setStatus('empty', `Sin resultados para "${q}".`);
+    } else {
+      hideStatus();
+      renderGrid(items);
+    }
+  } catch (e) {
+    setStatus('empty', 'Error al conectar con NASA. Intentá de nuevo.');
+  }
+}
+
+function quickSearch(q) {
+  document.getElementById('searchInput').value = q;
+  // Highlight active topic
+  document.querySelectorAll('.gallery-topic-btn').forEach(b => {
+    b.classList.toggle('gallery-topic-btn--active', b.textContent === q || b.getAttribute('onclick').includes(`'${q}'`));
+  });
+  search();
+}
+
+// ── Grid ──────────────────────────────────────────────────────
+function clearGrid() {
+  document.getElementById('galleryGrid').innerHTML = '';
+}
+
+function renderGrid(items) {
+  const grid = document.getElementById('galleryGrid');
+
+  items.forEach(item => {
+    const meta  = item.data?.[0];
+    const thumb = item.links?.[0]?.href;
+    if (!meta || !thumb) return;
+
+    itemCache.set(meta.nasa_id, { ...meta, thumb });
+    const isFav = favorites.some(f => f.nasa_id === meta.nasa_id);
+
+    const card = document.createElement('div');
+    card.className = 'gallery-card';
+    card.dataset.nasaId = meta.nasa_id;
+
+    card.innerHTML = `
+      <div class="gallery-card__media">
+        <img class="gallery-card__img" src="${thumb}" alt="" loading="lazy" />
+        ${meta.media_type === 'video' ? '<span class="gallery-card__badge">Video</span>' : ''}
+        <div class="gallery-card__overlay">
+          <button class="gallery-card__fav-btn ${isFav ? 'gallery-card__fav-btn--active' : ''}" data-action="fav" title="Favorito">
+            ${isFav ? '♥' : '♡'}
+          </button>
+          <button class="gallery-card__add-btn" data-action="playlist" title="Agregar a playlist">+</button>
+          <button class="gallery-card__add-btn" data-action="download" title="Descargar">↓</button>
+        </div>
+      </div>
+      <p class="gallery-card__title">${esc(meta.title || '')}</p>
+      <p class="gallery-card__date">${(meta.date_created || '').slice(0, 10)}</p>
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
+// Event delegation
+document.getElementById('galleryGrid').addEventListener('click', e => {
+  const card = e.target.closest('.gallery-card');
+  if (!card) return;
+  const id   = card.dataset.nasaId;
+  const item = itemCache.get(id);
+  if (!item) return;
+
+  if (e.target.dataset.action === 'fav') {
+    toggleFav(id, item.title, item.thumb, e.target);
+  } else if (e.target.dataset.action === 'playlist') {
+    showPlaylistMenu(id, item.title, item.thumb, e.target);
+  } else if (e.target.dataset.action === 'download') {
+    downloadImg(item.thumb, `${(item.title || 'nasa').slice(0, 60)}.jpg`);
+  } else if (!e.target.closest('.gallery-card__overlay')) {
+    openModal(item);
+  }
+});
+
+// ── Favoritos ─────────────────────────────────────────────────
+function toggleFav(nasa_id, title, thumb, btn) {
+  const idx = favorites.findIndex(f => f.nasa_id === nasa_id);
+  if (idx === -1) {
+    favorites.push({ nasa_id, title, thumb });
+    btn.textContent = '♥';
+    btn.classList.add('gallery-card__fav-btn--active');
+  } else {
+    favorites.splice(idx, 1);
+    btn.textContent = '♡';
+    btn.classList.remove('gallery-card__fav-btn--active');
+  }
+  saveFavs();
+  renderFavorites();
+}
+
+function renderFavorites() {
+  const el = document.getElementById('favsList');
+  if (!favorites.length) {
+    el.innerHTML = '<p class="gallery-sidebar__empty">Sin favoritos aún.</p>';
+    return;
+  }
+  el.innerHTML = favorites.map(f => `
+    <div class="gallery-sidebar__item" onclick="quickSearch('${esc(f.title)}')">
+      <img src="${f.thumb}" alt="" />
+      <span>${esc(f.title)}</span>
+      <button class="gallery-sidebar__remove" onclick="event.stopPropagation();removeFav('${f.nasa_id}')">✕</button>
+    </div>
+  `).join('');
+}
+
+function removeFav(nasa_id) {
+  favorites = favorites.filter(f => f.nasa_id !== nasa_id);
+  saveFavs();
+  renderFavorites();
+}
+
+// ── Playlists ─────────────────────────────────────────────────
+function createPlaylist() {
+  const name = prompt('Nombre de la playlist:');
+  if (!name?.trim()) return;
+  playlists.push({ id: Date.now(), name: name.trim(), items: [] });
+  saveLists();
+  renderPlaylists();
+}
+
+function renderPlaylists() {
+  const el = document.getElementById('playlistsList');
+  if (!playlists.length) {
+    el.innerHTML = '<p class="gallery-sidebar__empty">Sin playlists aún.</p>';
+    return;
+  }
+  el.innerHTML = playlists.map(p => `
+    <div class="gallery-sidebar__playlist">
+      <div class="gallery-sidebar__playlist-header">
+        <span class="gallery-sidebar__playlist-name">${esc(p.name)}</span>
+        <span class="gallery-sidebar__playlist-count">${p.items.length}</span>
+      </div>
+      <div class="gallery-sidebar__playlist-thumbs">
+        ${p.items.slice(0, 3).map(i => `<img src="${i.thumb}" alt="" />`).join('')}
+      </div>
+      <button class="gallery-sidebar__remove" onclick="removePlaylist(${p.id})">Eliminar</button>
+    </div>
+  `).join('');
+}
+
+function removePlaylist(id) {
+  playlists = playlists.filter(p => p.id !== id);
+  saveLists();
+  renderPlaylists();
+}
+
+function showPlaylistMenu(nasa_id, title, thumb, anchor) {
+  const menu = document.getElementById('playlistMenu');
+
+  if (!playlists.length) {
+    createPlaylist();
+    return;
+  }
+
+  menu.innerHTML = playlists.map(p => `
+    <button class="playlist-menu__item" onclick="addToPlaylist(${p.id},'${nasa_id}','${esc(title)}','${thumb}')">
+      ${esc(p.name)}
+    </button>
+  `).join('') + `<button class="playlist-menu__item playlist-menu__item--new" onclick="createPlaylist()">+ Nueva playlist</button>`;
+
+  const rect = anchor.getBoundingClientRect();
+  menu.style.display = 'block';
+  menu.style.top  = `${rect.bottom + window.scrollY + 6}px`;
+  menu.style.left = `${rect.left + window.scrollX}px`;
+
+  setTimeout(() => document.addEventListener('click', () => { menu.style.display = 'none'; }, { once: true }), 0);
+}
+
+function addToPlaylist(playlistId, nasa_id, title, thumb) {
+  const pl = playlists.find(p => p.id === playlistId);
+  if (!pl || pl.items.some(i => i.nasa_id === nasa_id)) return;
+  pl.items.push({ nasa_id, title, thumb });
+  saveLists();
+  renderPlaylists();
+  document.getElementById('playlistMenu').style.display = 'none';
+}
+
+// ── Descarga ──────────────────────────────────────────────────
+let currentDownloadUrl = '';
+
+function downloadImg(url, filename) {
+  const a    = document.createElement('a');
+  a.href     = `/gallery/download/?url=${encodeURIComponent(url)}`;
+  a.download = filename;
+  a.click();
+}
+
+function downloadCurrent() {
+  if (!currentDownloadUrl) return;
+  const title = document.getElementById('modalTitle').textContent || 'nasa';
+  const ext   = currentDownloadUrl.split('.').pop().split('?')[0] || 'jpg';
+  downloadImg(currentDownloadUrl, `${title.slice(0, 60)}.${ext}`);
+}
+
+// ── Modal ─────────────────────────────────────────────────────
+async function openModal(item) {
+  const img   = document.getElementById('modalImg');
+  const video = document.getElementById('modalVideo');
+
+  // Reset
+  img.style.display   = 'block';
+  video.style.display = 'none';
+  video.pause();
+  video.src = '';
+  img.src            = item.thumb;
+  currentDownloadUrl = item.thumb;
+
+  document.getElementById('modalTitle').textContent = item.title || '';
+  document.getElementById('modalDate').textContent  = (item.date_created || '').slice(0, 10);
+  document.getElementById('modalDesc').textContent  = item.description || '';
+  document.getElementById('galleryModal').classList.add('gallery-modal--open');
+  document.body.style.overflow = 'hidden';
+
+  // Fetch asset manifest para video o imagen HD
+  try {
+    const res   = await fetch(`https://images-api.nasa.gov/asset/${item.nasa_id}`);
+    const data  = await res.json();
+    const hrefs = (data?.collection?.items || []).map(i => i.href);
+
+    if (item.media_type === 'video') {
+      // Preferir la versión original, luego cualquier mp4
+      const mp4 = hrefs.find(h => h.includes('orig') && h.endsWith('.mp4'))
+               || hrefs.find(h => h.endsWith('.mp4'));
+      if (mp4) {
+        video.src              = mp4;
+        video.style.display    = 'block';
+        img.style.display      = 'none';
+        currentDownloadUrl     = mp4;
+        video.play().catch(() => {});
+      }
+    } else {
+      // Imagen HD
+      const hd = hrefs.find(h => h.includes('orig') && h.match(/\.(jpg|jpeg|png)$/i))
+              || hrefs.find(h => h.match(/\.(jpg|jpeg|png)$/i));
+      if (hd) { img.src = hd; currentDownloadUrl = hd; }
+    }
+  } catch (e) {
+    // Si falla el asset, quedamos con el thumbnail ya cargado
+  }
+}
+
+function closeModal() {
+  const video = document.getElementById('modalVideo');
+  video.pause();
+  video.src = '';
+  document.getElementById('galleryModal').classList.remove('gallery-modal--open');
+  document.body.style.overflow = '';
+}
+
+function handleModalClick(e) {
+  if (e.target === document.getElementById('galleryModal')) closeModal();
+}
+
+// ── Status ────────────────────────────────────────────────────
+function setStatus(type, msg) {
+  const el = document.getElementById('galleryStatus');
+  el.textContent = msg;
+  el.className = 'gallery-status';
+  el.classList.remove('gallery-status--hidden');
+}
+function hideStatus() {
+  document.getElementById('galleryStatus').classList.add('gallery-status--hidden');
+}
+
+// ── Init ──────────────────────────────────────────────────────
+renderFavorites();
+renderPlaylists();
+quickSearch('universe');
+</script>
+{% endblock %}

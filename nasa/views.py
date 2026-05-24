@@ -3,6 +3,7 @@ import json
 import requests
 from datetime import date
 from django.shortcuts import render
+from django.http import HttpResponse, HttpResponseBadRequest
 
 NASA_API_KEY = os.environ["NASA_API_KEY"]
 
@@ -170,6 +171,28 @@ def get_eonet():
     except Exception as e:
         print(f"Error fetching EONET data: {e}")
         return []
+
+
+def gallery(request):
+    return render(request, "gallery.html")
+
+
+def download_proxy(request):
+    url = request.GET.get("url", "")
+    # Solo permitir dominios de NASA
+    allowed = ("https://images-assets.nasa.gov/", "https://apod.nasa.gov/")
+    if not url or not url.startswith(allowed):
+        return HttpResponseBadRequest("URL no permitida")
+    try:
+        r = requests.get(url, timeout=30)
+        r.raise_for_status()
+        filename = url.split("/")[-1].split("?")[0]
+        content_type = r.headers.get("Content-Type", "application/octet-stream")
+        response = HttpResponse(r.content, content_type=content_type)
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+    except Exception as e:
+        return HttpResponseBadRequest(f"Error al descargar: {e}")
 
 
 def earth(request):
