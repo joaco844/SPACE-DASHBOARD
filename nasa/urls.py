@@ -7,4 +7,5 @@ urlpatterns = [
     path("earth/eonet/", views.eonet, name="eonet"),
     path("gallery/", views.gallery, name="gallery"),
     path("gallery/download/", views.download_proxy, name="download_proxy"),
+    path("mission/", views.mission, name="mission"),
 ]

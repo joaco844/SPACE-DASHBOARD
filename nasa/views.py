@@ -195,6 +195,10 @@ def download_proxy(request):
         return HttpResponseBadRequest(f"Error al descargar: {e}")
 
 
+def mission(request):
+    return render(request, "mission.html")
+
+
 def earth(request):
     return render(request, "earth.html", {
         "co2": get_co2(),

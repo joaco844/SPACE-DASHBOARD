@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mission Planner — Space Dashboard{% endblock %}
+
+{% block sub_nav_title %}Mission Planner{% endblock %}
+
+{% block sub_nav_links %}
+<li><a href="#trayectoria">Trayectoria</a></li>
+<li><a href="#ventanas">Ventanas</a></li>
+<li><a href="#simulador">Simulador</a></li>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="tile tile--dark">
+  <div class="tile__inner">
+    <p class="tile__label">Mission Planner</p>
+    <h1 class="tile__headline">Space Mission Planner</h1>
+    <p class="tile__tagline">Planificá tu viaje al cosmos con física real</p>
+    <div class="btn-group">
+      <a href="#trayectoria" class="btn btn--primary">Calcular trayectoria</a>
+      <a href="#ventanas" class="btn btn--ghost" style="color:#2997ff;border-color:#2997ff;">Ver ventanas</a>
+    </div>
+  </div>
+</section>
+
+<!-- Trajectory Calculator -->
+<section class="tile tile--light" id="trayectoria">
+  <div class="tile__inner">
+    <p class="tile__label">Trayectorias</p>
+    <h2 class="tile__headline">Calculadora de trayectoria</h2>
+    <p class="tile__tagline">Destino, tipo de misión y fecha de lanzamiento</p>
+
+    <div class="mission-calc-layout">
+
+      <!-- Form -->
+      <div class="mission-form">
+        <div class="mission-field">
+          <label class="mission-field__label" for="dest-select">Destino</label>
+          <select class="mission-field__select" id="dest-select">
+            <option value="moon">🌕  Luna</option>
+            <option value="mars" selected>🔴  Marte</option>
+            <option value="venus">✨  Venus</option>
+            <option value="jupiter">🪐  Júpiter</option>
+            <option value="saturn">💫  Saturno</option>
+          </select>
+        </div>
+        <div class="mission-field">
+          <label class="mission-field__label" for="mission-type">Tipo de misión</label>
+          <select class="mission-field__select" id="mission-type">
+            <option value="flyby">Flyby (pasada)</option>
+            <option value="orbit" selected>Inserción orbital</option>
+            <option value="landing">Aterrizaje</option>
+          </select>
+        </div>
+        <div class="mission-field">
+          <label class="mission-field__label" for="launch-date">Fecha de lanzamiento</label>
+          <input class="mission-field__input" type="date" id="launch-date" />
+        </div>
+        <div class="mission-field">
+          <label class="mission-field__label" for="rocket-mass">Masa del cohete (toneladas)</label>
+          <input class="mission-field__input" type="number" id="rocket-mass" value="500" min="10" max="50000" />
+        </div>
+        <button class="btn btn--primary" onclick="calcularTrayectoria()" style="align-self:flex-start;">
+          Calcular misión
+        </button>
+      </div>
+
+      <!-- Results -->
+      <div class="mission-results-wrap">
+        <div id="mission-placeholder" class="mission-results__placeholder">
+          <div style="font-size:48px;margin-bottom:16px;">🚀</div>
+          <div>Completá el formulario y presioná<br><strong>Calcular misión</strong></div>
+        </div>
+        <div id="mission-results" class="mission-results mission-results--hidden">
+          <div id="res-badge" class="mission-destination-badge"></div>
+          <div class="mission-stat-grid">
+            <div class="mission-stat">
+              <div class="mission-stat__value" id="res-time">—</div>
+              <div class="mission-stat__label">Duración del viaje</div>
+            </div>
+            <div class="mission-stat">
+              <div class="mission-stat__value" id="res-arrival">—</div>
+              <div class="mission-stat__label">Llegada estimada</div>
+            </div>
+            <div class="mission-stat">
+              <div class="mission-stat__value" id="res-deltav">—</div>
+              <div class="mission-stat__label">Delta-V total</div>
+            </div>
+            <div class="mission-stat">
+              <div class="mission-stat__value" id="res-fuel">—</div>
+              <div class="mission-stat__label">Combustible estimado</div>
+            </div>
+          </div>
+          <p id="res-note" class="mission-result-note"></p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Launch Windows -->
+<section class="tile tile--dark" id="ventanas">
+  <div class="tile__inner">
+    <p class="tile__label">Launch Windows</p>
+    <h2 class="tile__headline">Ventanas de lanzamiento a Marte</h2>
+    <p class="tile__tagline">Las alineaciones óptimas ocurren cada ~26 meses</p>
+    <div class="launch-windows-grid" id="launch-windows-grid"></div>
+    <p style="font-size:13px;color:var(--color-muted-on-dark);opacity:0.45;margin-top:var(--space-xl);text-align:left;">
+      Calculado usando el período sinódico de Marte (779.94 días). Las ventanas están centradas en la oposición Tierra–Marte.
+    </p>
+  </div>
+</section>
+
+<!-- Mission Simulator -->
+<section class="tile tile--parchment" id="simulador">
+  <div class="tile__inner">
+    <p class="tile__label">Simulador</p>
+    <h2 class="tile__headline">Simulador de misión a Marte</h2>
+    <p class="tile__tagline">Recorrido paso a paso de un viaje real</p>
+
+    <div class="mission-sim-layout">
+
+      <!-- Stats + controls -->
+      <div>
+        <p style="font-size:17px;color:var(--color-ink-muted-80);line-height:1.55;margin-bottom:var(--space-xl);">
+          Una misión tripulada a Marte involucra múltiples fases críticas. Este simulador muestra el perfil completo basado en la próxima ventana de lanzamiento disponible.
+        </p>
+        <div class="mission-sim-stats">
+          <div class="mission-stat">
+            <div class="mission-stat__value" id="sim-launch">—</div>
+            <div class="mission-stat__label">Fecha de lanzamiento</div>
+          </div>
+          <div class="mission-stat">
+            <div class="mission-stat__value" id="sim-arrival">—</div>
+            <div class="mission-stat__label">Llegada a Marte</div>
+          </div>
+          <div class="mission-stat">
+            <div class="mission-stat__value">259 <span class="mission-stat__unit">días</span></div>
+            <div class="mission-stat__label">Transferencia Hohmann</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span class="mission-phase__time" id="sim-phase-label" style="color:var(--color-ink-muted-48);">Listo para simular</span>
+            <span class="mission-phase__time" id="sim-pct" style="color:var(--color-ink-muted-48);">0%</span>
+          </div>
+          <div class="mission-progress-bar">
+            <div class="mission-progress-bar__fill" id="sim-fill"></div>
+          </div>
+        </div>
+
+        <div class="btn-group" style="justify-content:flex-start;margin-top:var(--space-lg);">
+          <button class="btn btn--primary" id="sim-btn" onclick="iniciarSimulador()">Iniciar simulación</button>
+          <button class="btn btn--ghost" onclick="resetSimulador()">Resetear</button>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="mission-timeline" id="mission-timeline"></div>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ── Destination data ──────────────────────────────────────────
+const DEST = {
+  moon:    { name:'Luna',    emoji:'🌕', transferDays:3,    dv:3.93, note:'Trayectoria directa. Retorno posible desde la superficie.' },
+  mars:    { name:'Marte',   emoji:'🔴', transferDays:259,  dv:5.59, note:'Órbita de transferencia Hohmann. Ventana óptima cada 26 meses.' },
+  venus:   { name:'Venus',   emoji:'✨', transferDays:146,  dv:5.50, note:'Temperatura de superficie ~465°C. Solo misiones robóticas.' },
+  jupiter: { name:'Júpiter', emoji:'🪐', transferDays:997,  dv:6.30, note:'Flyby gravitacional con la Tierra o Venus puede reducir el delta-V.' },
+  saturn:  { name:'Saturno', emoji:'💫', transferDays:2219, dv:6.18, note:'Asistencia gravitacional de Júpiter reduce el tiempo de viaje.' },
+};
+
+const TYPE_TIME_MULT = { flyby:0.85, orbit:1.0, landing:1.12 };
+const TYPE_DV_MULT   = { flyby:0.75, orbit:1.0, landing:1.38 };
+const TYPE_LABEL     = { flyby:'Flyby', orbit:'Inserción orbital', landing:'Aterrizaje' };
+
+// ── Trajectory calculator ─────────────────────────────────────
+function calcularTrayectoria() {
+  const destKey  = document.getElementById('dest-select').value;
+  const mtype    = document.getElementById('mission-type').value;
+  const dateVal  = document.getElementById('launch-date').value;
+  const massVal  = parseFloat(document.getElementById('rocket-mass').value) || 500;
+
+  const d        = DEST[destKey];
+  const days     = Math.round(d.transferDays * (TYPE_TIME_MULT[mtype] || 1));
+  const dv       = (d.dv * (TYPE_DV_MULT[mtype] || 1)).toFixed(2);
+
+  const launch   = dateVal ? new Date(dateVal + 'T12:00:00') : new Date();
+  const arrival  = new Date(launch.getTime() + days * 86400000);
+
+  // Tsiolkovsky: m_fuel = m0 * (exp(dv/ve) - 1), ve ≈ 4.41 km/s (Isp ~450 s)
+  const ve       = 4.41;
+  const fuelTons = Math.round(massVal * (Math.exp(parseFloat(dv) / ve) - 1));
+
+  const fmtDate  = dt => dt.toLocaleDateString('es-AR', { day:'numeric', month:'short', year:'numeric' });
+  const fmtDays  = n  => n >= 365
+    ? `${(n/365.25).toFixed(1)} <span class="mission-stat__unit">años</span>`
+    : `${n} <span class="mission-stat__unit">días</span>`;
+
+  document.getElementById('res-badge').textContent   = `${d.emoji} ${d.name} · ${TYPE_LABEL[mtype]}`;
+  document.getElementById('res-time').innerHTML      = fmtDays(days);
+  document.getElementById('res-arrival').textContent = fmtDate(arrival);
+  document.getElementById('res-deltav').innerHTML    = `${dv} <span class="mission-stat__unit">km/s</span>`;
+  document.getElementById('res-fuel').innerHTML      = `${fuelTons.toLocaleString('es-AR')} <span class="mission-stat__unit">t</span>`;
+  document.getElementById('res-note').textContent    = d.note;
+
+  document.getElementById('mission-placeholder').classList.add('mission-results__placeholder--hidden');
+  document.getElementById('mission-results').classList.remove('mission-results--hidden');
+}
+
+// ── Launch windows ────────────────────────────────────────────
+const SYNODIC = 779.94;                        // Mars synodic period (days)
+const REF_OPP = new Date('2025-01-16T12:00:00'); // Known Mars opposition
+
+function getMarsWindows(count) {
+  const today   = new Date();
+  const windows = [];
+
+  // Find most recent past opposition relative to today
+  let opp = new Date(REF_OPP);
+  while (new Date(opp.getTime() + SYNODIC * 86400000) < today)
+    opp = new Date(opp.getTime() + SYNODIC * 86400000);
+  while (opp > today)
+    opp = new Date(opp.getTime() - SYNODIC * 86400000);
+
+  const cutoff = new Date(today.getTime() - 45 * 86400000);
+
+  for (let i = 0; windows.length < count; i++) {
+    const oppDate = new Date(opp.getTime() + i * SYNODIC * 86400000);
+    const open    = new Date(oppDate.getTime() - 93 * 86400000);
+    const close   = new Date(oppDate.getTime() - 40 * 86400000);
+    if (close < cutoff) continue;
+
+    const mid     = new Date((open.getTime() + close.getTime()) / 2);
+    const arrival = new Date(mid.getTime() + 259 * 86400000);
+    windows.push({ oppDate, open, close, arrival });
+  }
+  return windows;
+}
+
+function renderLaunchWindows() {
+  const grid  = document.getElementById('launch-windows-grid');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const fmt   = d => d.toLocaleDateString('es-AR', { day:'numeric', month:'short', year:'numeric' });
+
+  grid.innerHTML = getMarsWindows(5).map(w => {
+    const isOpen = today >= w.open && today <= w.close;
+    const isPast = today > w.close;
+    const daysOpen  = Math.ceil((w.open  - today) / 86400000);
+    const daysClose = Math.ceil((w.close - today) / 86400000);
+
+    let statusHtml = '', countdownHtml = '';
+
+    if (isOpen) {
+      statusHtml   = `<span class="launch-window-card__status launch-window-card__status--open">● Abierta ahora</span>`;
+      countdownHtml= `<div class="launch-window-card__countdown">${daysClose}</div><div class="launch-window-card__countdown-label">días restantes</div>`;
+    } else if (isPast) {
+      statusHtml   = `<span class="launch-window-card__status launch-window-card__status--past">Cerrada</span>`;
+    } else {
+      statusHtml   = `<span class="launch-window-card__status launch-window-card__status--soon">Próxima</span>`;
+      countdownHtml= `<div class="launch-window-card__countdown">${daysOpen}</div><div class="launch-window-card__countdown-label">días para apertura</div>`;
+    }
+
+    return `
+      <div class="launch-window-card ${isOpen ? 'launch-window-card--active' : ''}">
+        ${statusHtml}
+        <div class="launch-window-card__dates">${fmt(w.open)}<br>→ ${fmt(w.close)}</div>
+        <div class="launch-window-card__detail">Oposición: ${fmt(w.oppDate)}</div>
+        <div class="launch-window-card__detail">Llegada: ${fmt(w.arrival)}</div>
+        ${countdownHtml}
+      </div>`;
+  }).join('');
+}
+
+// ── Mission simulator ─────────────────────────────────────────
+const PHASES = [
+  { time:'T+0',         name:'Lanzamiento',              desc:'Encendido de motores y despegue desde la Tierra' },
+  { time:'T+10 min',    name:'Separación de etapas',     desc:'La primera etapa se separa y retorna para reutilización' },
+  { time:'T+32 min',    name:'Órbita baja terrestre',    desc:'Inserción en órbita circular a ~400 km de altitud' },
+  { time:'T+6 h',       name:'Inyección transmarsciana', desc:'Quema de salida hacia la órbita de transferencia Hohmann' },
+  { time:'T+130 días',  name:'Corrección de rumbo',      desc:'Pequeñas maniobras para ajustar la trayectoria heliocéntrica' },
+  { time:'T+259 días',  name:'Captura orbital en Marte', desc:'Frenado aerodinámico e inserción en órbita marciana' },
+  { time:'T+266 días',  name:'Descenso y aterrizaje',    desc:'Entrada en la atmósfera, despliegue de paracaídas y aterrizaje' },
+];
+
+let simInterval = null;
+let simStep     = -1;
+
+function renderTimeline() {
+  document.getElementById('mission-timeline').innerHTML = PHASES.map((p, i) => `
+    <div class="mission-phase" id="ph-${i}">
+      <div class="mission-phase__track">
+        <div class="mission-phase__dot"></div>
+        ${i < PHASES.length - 1 ? '<div class="mission-phase__line"></div>' : ''}
+      </div>
+      <div class="mission-phase__content">
+        <div class="mission-phase__time">${p.time}</div>
+        <div class="mission-phase__name">${p.name}</div>
+        <div class="mission-phase__desc">${p.desc}</div>
+      </div>
+    </div>`).join('');
+}
+
+function setSimDates() {
+  const today   = new Date();
+  const windows = getMarsWindows(5);
+  const next    = windows.find(w => w.close >= today) || windows[0];
+  const launch  = next.open > today ? next.open : today;
+  const arrival = new Date(launch.getTime() + 259 * 86400000);
+  const fmt     = d => d.toLocaleDateString('es-AR', { day:'numeric', month:'short', year:'numeric' });
+  document.getElementById('sim-launch').textContent  = fmt(launch);
+  document.getElementById('sim-arrival').textContent = fmt(arrival);
+}
+
+function activatePhase(step) {
+  PHASES.forEach((_, i) => {
+    const el = document.getElementById(`ph-${i}`);
+    el.classList.remove('mission-phase--active', 'mission-phase--done');
+    if (i < step)  el.classList.add('mission-phase--done');
+    if (i === step) el.classList.add('mission-phase--active');
+  });
+  const pct = step < 0 ? 0 : Math.round((step / (PHASES.length - 1)) * 100);
+  document.getElementById('sim-fill').style.width       = pct + '%';
+  document.getElementById('sim-pct').textContent        = pct + '%';
+  document.getElementById('sim-phase-label').textContent = step >= 0 ? PHASES[step].name : 'Listo para simular';
+}
+
+function iniciarSimulador() {
+  if (simInterval) return;
+  simStep = 0;
+  activatePhase(simStep);
+  const btn = document.getElementById('sim-btn');
+  btn.textContent = 'Simulando…';
+  btn.disabled    = true;
+  simInterval = setInterval(() => {
+    simStep++;
+    if (simStep >= PHASES.length) {
+      clearInterval(simInterval); simInterval = null;
+      btn.textContent = 'Misión completada ✓';
+      return;
+    }
+    activatePhase(simStep);
+  }, 1200);
+}
+
+function resetSimulador() {
+  if (simInterval) { clearInterval(simInterval); simInterval = null; }
+  simStep = -1;
+  activatePhase(-1);
+  const btn = document.getElementById('sim-btn');
+  btn.textContent = 'Iniciar simulación';
+  btn.disabled    = false;
+}
+
+// ── Init ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const t  = new Date();
+  const yy = t.getFullYear();
+  const mm = String(t.getMonth() + 1).padStart(2, '0');
+  const dd = String(t.getDate()).padStart(2, '0');
+  document.getElementById('launch-date').value = `${yy}-${mm}-${dd}`;
+
+  renderLaunchWindows();
+  renderTimeline();
+  setSimDates();
+});
+</script>
+{% endblock %}
