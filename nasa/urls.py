@@ -3,4 +3,6 @@ from . import views
 
 urlpatterns = [
     path("", views.dashboard, name="dashboard"),
+    path("earth/", views.earth, name="earth"),
+    path("earth/eonet/", views.eonet, name="eonet"),
 ]
