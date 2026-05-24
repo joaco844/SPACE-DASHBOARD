@@ -199,6 +199,50 @@ def mission(request):
     return render(request, "mission.html")
 
 
+def get_comets():
+    try:
+        r = requests.get(
+            "https://ssd-api.jpl.nasa.gov/sbdb_query.api",
+            params={
+                "fields": "full_name,e,a,i,om,w,ma,per",
+                "sb-kind": "c",
+                "sb-class": "HTC,ETc,JFc,COM",
+                "limit": 20,
+            },
+            timeout=15,
+        )
+        r.raise_for_status()
+        data = r.json()
+        fields = data.get("fields", [])
+        comets = []
+        for row in data.get("data", []):
+            obj = dict(zip(fields, row))
+            try:
+                comets.append({
+                    "name": str(obj.get("full_name", "")).strip(),
+                    "e":    float(obj.get("e", 0)),
+                    "a":    float(obj.get("a", 0)),
+                    "i":    float(obj.get("i", 0)),
+                    "om":   float(obj.get("om", 0)),
+                    "w":    float(obj.get("w", 0)),
+                    "ma":   float(obj.get("ma", 0)),
+                    "per":  float(obj.get("per", 0)),
+                })
+            except (TypeError, ValueError):
+                continue
+        return comets
+    except Exception as e:
+        print(f"Error fetching comets: {e}")
+        return []
+
+
+def solar_system(request):
+    comets = get_comets()
+    return render(request, "solar.html", {
+        "comets_json": json.dumps(comets),
+    })
+
+
 def earth(request):
     return render(request, "earth.html", {
         "co2": get_co2(),

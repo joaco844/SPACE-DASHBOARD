@@ -1,0 +1,523 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Solar System — Space Dashboard{% endblock %}
+
+{% block sub_nav_title %}Solar System{% endblock %}
+
+{% block sub_nav_links %}
+<li><a href="#simulador">Simulador</a></li>
+<li><a href="#cometas">Cometas</a></li>
+{% endblock %}
+
+{% block extra_head %}
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="tile tile--dark">
+  <div class="tile__inner">
+    <p class="tile__label">Solar System</p>
+    <h1 class="tile__headline">Sistema Solar en 3D</h1>
+    <p class="tile__tagline">Planetas y cometas activos con órbitas reales</p>
+    <div class="btn-group">
+      <a href="#simulador" class="btn btn--primary">Ver simulador</a>
+      <a href="#cometas" class="btn btn--ghost" style="color:#2997ff;border-color:#2997ff;">Ver cometas</a>
+    </div>
+  </div>
+</section>
+
+<!-- 3D Simulator -->
+<section class="tile tile--dark-2" id="simulador" style="padding-bottom: var(--space-section);">
+  <div class="tile__inner">
+    <p class="tile__label">Simulador 3D</p>
+    <h2 class="tile__headline">Posiciones en tiempo real</h2>
+    <p class="tile__tagline" style="margin-bottom: var(--space-xl);">Fecha de hoy · Órbitas de Kepler · Arrastrá para rotar</p>
+
+    <!-- Canvas -->
+    <div class="solar-canvas-wrap">
+      <canvas id="solar-canvas"></canvas>
+
+      <!-- Tooltip -->
+      <div class="solar-tooltip" id="solar-tooltip">
+        <div class="solar-tooltip__name" id="tt-name">—</div>
+        <div class="solar-tooltip__row">Distancia al Sol: <span id="tt-dist">—</span></div>
+        <div class="solar-tooltip__row">Período orbital: <span id="tt-per">—</span></div>
+        <div class="solar-tooltip__row" id="tt-extra-row" style="display:none;">Excentricidad: <span id="tt-ecc">—</span></div>
+      </div>
+
+      <!-- Controls -->
+      <div class="solar-controls">
+        <div class="solar-ctrl-group">
+          <span class="solar-ctrl-label">Velocidad</span>
+          <input type="range" class="solar-slider" id="speed-slider" min="0" max="100" value="20">
+          <span class="solar-ctrl-value" id="speed-val">20</span>
+        </div>
+        <div class="solar-ctrl-sep"></div>
+        <div class="solar-ctrl-group">
+          <span class="solar-ctrl-label">Escala</span>
+          <button class="solar-scale-btn solar-scale-btn--active" id="btn-log" onclick="setScale('log')">Log</button>
+          <button class="solar-scale-btn" id="btn-lin" onclick="setScale('lin')">Lineal</button>
+        </div>
+        <div class="solar-ctrl-sep"></div>
+        <button class="solar-play-btn" id="play-btn" onclick="togglePlay()">Pausar</button>
+      </div>
+    </div>
+
+    <!-- Date display -->
+    <p style="margin-top:var(--space-lg);font-size:14px;color:var(--color-muted-on-dark);letter-spacing:-0.224px;">
+      Fecha simulada: <strong id="sim-date" style="color:var(--color-on-dark);"></strong>
+    </p>
+
+  </div>
+</section>
+
+<!-- Comets list -->
+<section class="tile tile--dark" id="cometas">
+  <div class="tile__inner">
+    <p class="tile__label">JPL Small Body Database</p>
+    <h2 class="tile__headline">Cometas activos</h2>
+    <p class="tile__tagline">Elementos orbitales en tiempo real desde NASA/JPL</p>
+    <div class="solar-comet-grid" id="comet-grid">
+      <div class="state-loading" style="color:var(--color-muted-on-dark);">Cargando cometas…</div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ── Comets data from Django ───────────────────────────────────
+const COMETS_RAW = {{ comets_json|safe }};
+
+// ── Planet data (hardcoded Keplerian elements, J2000 epoch) ──
+// a = semi-major axis (AU), e = eccentricity, i = inclination (deg)
+// om = longitude of ascending node, w = arg of perihelion, L0 = mean longitude at J2000
+const PLANETS = [
+  { name:'Mercurio', color:0x9E9E9E, r:0.38, a:0.387, e:0.206, i:7.00,  om:48.3,  w:29.1,  L0:252.3, per:87.97,  dist:'0.39 AU' },
+  { name:'Venus',    color:0xE8C97A, r:0.95, a:0.723, e:0.007, i:3.39,  om:76.7,  w:54.9,  L0:181.9, per:224.7,  dist:'0.72 AU' },
+  { name:'Tierra',   color:0x4A90E2, r:1.00, a:1.000, e:0.017, i:0.00,  om:0.0,   w:102.9, L0:100.5, per:365.25, dist:'1.00 AU' },
+  { name:'Marte',    color:0xC1440E, r:0.53, a:1.524, e:0.093, i:1.85,  om:49.6,  w:286.5, L0:355.5, per:686.97, dist:'1.52 AU' },
+  { name:'Júpiter',  color:0xC88B3A, r:2.80, a:5.203, e:0.049, i:1.30,  om:100.5, w:273.9, L0:34.4,  per:4332.6, dist:'5.20 AU' },
+  { name:'Saturno',  color:0xE4D191, r:2.40, a:9.537, e:0.057, i:2.49,  om:113.7, w:339.4, L0:50.1,  per:10759,  dist:'9.54 AU' },
+  { name:'Urano',    color:0x7DE8E8, r:1.70, a:19.19, e:0.046, i:0.77,  om:74.0,  w:96.5,  L0:314.1, per:30685,  dist:'19.19 AU' },
+  { name:'Neptuno',  color:0x3F54BA, r:1.65, a:30.07, e:0.010, i:1.77,  om:131.8, w:276.3, L0:304.3, per:60190,  dist:'30.07 AU' },
+];
+
+// ── Scale helpers ─────────────────────────────────────────────
+let scaleMode = 'log';
+
+function auToScene(au) {
+  if (scaleMode === 'log') {
+    if (au <= 0) return 0;
+    return Math.log10(au * 10 + 1) * 22;
+  }
+  return au * 2.2;
+}
+
+function planetVisualSize(r) {
+  return 0.18 + r * 0.22;
+}
+
+// ── Kepler solver ─────────────────────────────────────────────
+function solveKepler(M, e, tol = 1e-6) {
+  let E = M;
+  for (let i = 0; i < 50; i++) {
+    const dE = (M - E + e * Math.sin(E)) / (1 - e * Math.cos(E));
+    E += dE;
+    if (Math.abs(dE) < tol) break;
+  }
+  return E;
+}
+
+const DEG = Math.PI / 180;
+
+function keplerPosition(a, e, i, om, w, L0, per, daysSinceJ2000) {
+  const n  = 360 / per;                        // mean motion deg/day
+  const M  = ((L0 - w - om) + n * daysSinceJ2000) * DEG % (2 * Math.PI);
+  const Mn = ((M % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+  const E  = solveKepler(Mn, e);
+
+  // True anomaly
+  const nu = 2 * Math.atan2(
+    Math.sqrt(1 + e) * Math.sin(E / 2),
+    Math.sqrt(1 - e) * Math.cos(E / 2)
+  );
+  const r = a * (1 - e * Math.cos(E));  // AU
+
+  // Heliocentric coords in orbital plane
+  const xOrb = r * Math.cos(nu);
+  const yOrb = r * Math.sin(nu);
+
+  // Rotate to ecliptic
+  const wRad  = w  * DEG;
+  const omRad = om * DEG;
+  const iRad  = i  * DEG;
+
+  const cosOm = Math.cos(omRad), sinOm = Math.sin(omRad);
+  const cosW  = Math.cos(wRad),  sinW  = Math.sin(wRad);
+  const cosI  = Math.cos(iRad),  sinI  = Math.sin(iRad);
+
+  const x = (cosOm * cosW - sinOm * sinW * cosI) * xOrb
+          + (-cosOm * sinW - sinOm * cosW * cosI) * yOrb;
+  const y = (sinOm * cosW + cosOm * sinW * cosI) * xOrb
+          + (-sinOm * sinW + cosOm * cosW * cosI) * yOrb;
+  const z = (sinW * sinI) * xOrb + (cosW * sinI) * yOrb;
+
+  return { x, y, z, r };
+}
+
+// ── Days since J2000 ──────────────────────────────────────────
+function j2000(date) {
+  return (date - new Date('2000-01-01T12:00:00Z')) / 86400000;
+}
+
+// ── Scene setup ───────────────────────────────────────────────
+const canvas = document.getElementById('solar-canvas');
+const wrap   = canvas.parentElement;
+
+// Stubs defined early so HTML onclick handlers never throw
+window.togglePlay = () => {};
+window.setScale   = () => {};
+
+function isWebGLAvailable() {
+  try {
+    const t = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext &&
+      (t.getContext('webgl') || t.getContext('experimental-webgl')));
+  } catch(e) { return false; }
+}
+
+if (!isWebGLAvailable()) {
+  wrap.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                height:100%;gap:16px;padding:32px;background:#000;border-radius:8px;">
+      <div style="font-size:48px;">🌌</div>
+      <div style="font-size:17px;font-weight:600;color:#fff;">WebGL no disponible</div>
+      <div style="font-size:14px;color:#ccc;text-align:center;max-width:380px;line-height:1.6;">
+        El simulador 3D requiere WebGL. Abrí esta página en tu navegador en
+        <strong style="color:#2997ff;">localhost:8000/solar/</strong>
+      </div>
+    </div>`;
+} else {
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor(0x000000, 1);
+
+const scene  = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 2000);
+camera.position.set(0, 45, 55);
+camera.lookAt(0, 0, 0);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.minDistance   = 2;
+controls.maxDistance   = 300;
+
+// Resize
+function resizeRenderer() {
+  const w = wrap.clientWidth;
+  const h = wrap.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+resizeRenderer();
+new ResizeObserver(resizeRenderer).observe(wrap);
+
+// ── Stars background ──────────────────────────────────────────
+(function buildStars() {
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(3000 * 3);
+  for (let i = 0; i < 3000 * 3; i++) pos[i] = (Math.random() - 0.5) * 1200;
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.35, sizeAttenuation: true })));
+})();
+
+// ── Sun ───────────────────────────────────────────────────────
+const sunGeo  = new THREE.SphereGeometry(1.4, 32, 32);
+const sunMat  = new THREE.MeshBasicMaterial({ color: 0xFFF176 });
+const sunMesh = new THREE.Mesh(sunGeo, sunMat);
+scene.add(sunMesh);
+
+// Sun glow (sprite)
+const glowTex = (function() {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const ctx = c.getContext('2d');
+  const grad = ctx.createRadialGradient(64,64,0, 64,64,64);
+  grad.addColorStop(0,   'rgba(255,240,100,0.8)');
+  grad.addColorStop(0.3, 'rgba(255,200,50,0.3)');
+  grad.addColorStop(1,   'rgba(255,200,50,0)');
+  ctx.fillStyle = grad; ctx.fillRect(0,0,128,128);
+  return new THREE.CanvasTexture(c);
+})();
+const glowSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, transparent: true, depthWrite: false }));
+glowSprite.scale.setScalar(7);
+scene.add(glowSprite);
+
+// Ambient + point light
+scene.add(new THREE.AmbientLight(0xffffff, 0.15));
+const sunLight = new THREE.PointLight(0xfff5c0, 2.5, 0);
+scene.add(sunLight);
+
+// ── Build orbit ring ──────────────────────────────────────────
+function makeOrbitRing(a, e, i, om, w, segments = 180) {
+  const points = [];
+  for (let k = 0; k <= segments; k++) {
+    const nu = (k / segments) * 2 * Math.PI;
+    const r  = a * (1 - e * e) / (1 + e * Math.cos(nu));
+    const xO = r * Math.cos(nu);
+    const yO = r * Math.sin(nu);
+
+    const wRad = w * DEG, omRad = om * DEG, iRad = i * DEG;
+    const cosOm = Math.cos(omRad), sinOm = Math.sin(omRad);
+    const cosW  = Math.cos(wRad),  sinW  = Math.sin(wRad);
+    const cosI  = Math.cos(iRad),  sinI  = Math.sin(iRad);
+
+    const x = (cosOm * cosW - sinOm * sinW * cosI) * xO + (-cosOm * sinW - sinOm * cosW * cosI) * yO;
+    const y = (sinOm * cosW + cosOm * sinW * cosI) * xO + (-sinOm * sinW + cosOm * cosW * cosI) * yO;
+    const z = (sinW * sinI) * xO + (cosW * sinI) * yO;
+
+    const sc = auToScene(r);
+    const len = Math.sqrt(x*x + y*y + z*z) || 1;
+    points.push(new THREE.Vector3(x / len * sc, z / len * sc, y / len * sc));
+  }
+  const geo = new THREE.BufferGeometry().setFromPoints(points);
+  return new THREE.LineLoop(geo, new THREE.LineBasicMaterial({ color: 0x334455, transparent: true, opacity: 0.4 }));
+}
+
+// ── Build planet mesh ─────────────────────────────────────────
+function makePlanetMesh(p) {
+  const size = planetVisualSize(p.r);
+  const geo  = new THREE.SphereGeometry(size, 24, 24);
+  const mat  = new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.7, metalness: 0.1 });
+  return new THREE.Mesh(geo, mat);
+}
+
+// ── Build comet mesh ──────────────────────────────────────────
+function makeCometMesh() {
+  const geo = new THREE.SphereGeometry(0.12, 12, 12);
+  const mat = new THREE.MeshBasicMaterial({ color: 0x88ccff });
+  return new THREE.Mesh(geo, mat);
+}
+
+// ── Populate scene objects ────────────────────────────────────
+const planetMeshes = [];
+const cometMeshes  = [];
+const cometTails   = [];
+let   orbitRings   = [];
+
+function buildScene() {
+  // Remove old orbit rings
+  orbitRings.forEach(r => scene.remove(r));
+  orbitRings = [];
+
+  PLANETS.forEach((p, idx) => {
+    const ring = makeOrbitRing(p.a, p.e, p.i, p.om, p.w);
+    scene.add(ring);
+    orbitRings.push(ring);
+
+    if (!planetMeshes[idx]) {
+      const mesh = makePlanetMesh(p);
+      mesh.userData = { type: 'planet', data: p };
+      scene.add(mesh);
+      planetMeshes[idx] = mesh;
+
+      // Saturn rings
+      if (p.name === 'Saturno') {
+        const rGeo = new THREE.RingGeometry(planetVisualSize(p.r) * 1.5, planetVisualSize(p.r) * 2.5, 64);
+        const rMat = new THREE.MeshBasicMaterial({ color: 0xc8b060, side: THREE.DoubleSide, transparent: true, opacity: 0.55 });
+        const rMesh = new THREE.Mesh(rGeo, rMat);
+        rMesh.rotation.x = Math.PI / 2.5;
+        mesh.add(rMesh);
+      }
+    }
+  });
+
+  COMETS_RAW.forEach((c, idx) => {
+    const ring = makeOrbitRing(c.a, c.e, c.i, c.om, c.w, 240);
+    ring.material.color.set(0x2244aa);
+    ring.material.opacity = 0.25;
+    scene.add(ring);
+    orbitRings.push(ring);
+
+    if (!cometMeshes[idx]) {
+      const mesh = makeCometMesh();
+      mesh.userData = { type: 'comet', data: c };
+      scene.add(mesh);
+      cometMeshes[idx] = mesh;
+
+      // tail as a Line — 2 points updated each frame pointing away from sun
+      const tailGeo = new THREE.BufferGeometry();
+      tailGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3));
+      const tailLine = new THREE.Line(tailGeo,
+        new THREE.LineBasicMaterial({ color: 0x88ccff, transparent: true, opacity: 0.55 }));
+      scene.add(tailLine);
+      cometTails[idx] = tailLine;
+    }
+  });
+}
+
+buildScene();
+
+// ── Update positions ──────────────────────────────────────────
+function updatePositions(simDay) {
+  PLANETS.forEach((p, idx) => {
+    const { x, y, z, r } = keplerPosition(p.a, p.e, p.i, p.om, p.w, p.L0, p.per, simDay);
+    const sc  = auToScene(r);
+    const len = Math.sqrt(x*x + y*y + z*z) || 1;
+    planetMeshes[idx].position.set(x / len * sc, z / len * sc, y / len * sc);
+  });
+
+  COMETS_RAW.forEach((c, idx) => {
+    const { x, y, z, r } = keplerPosition(c.a, c.e, c.i, c.om, c.w, c.ma, c.per, simDay);
+    const sc  = auToScene(Math.min(r, 50));
+    const len = Math.sqrt(x*x + y*y + z*z) || 1;
+    const cx = x / len * sc, cy = z / len * sc, cz = y / len * sc;
+    cometMeshes[idx].position.set(cx, cy, cz);
+
+    // Tail line: starts at comet, extends away from sun
+    if (cometTails[idx]) {
+      const dl   = Math.sqrt(cx*cx + cy*cy + cz*cz) || 1;
+      const tLen = 2.5;
+      const attr = cometTails[idx].geometry.attributes.position;
+      attr.setXYZ(0, cx, cy, cz);
+      attr.setXYZ(1, cx + (cx / dl) * tLen, cy + (cy / dl) * tLen, cz + (cz / dl) * tLen);
+      attr.needsUpdate = true;
+    }
+  });
+}
+
+// ── Raycasting / tooltip ──────────────────────────────────────
+const raycaster  = new THREE.Raycaster();
+const mouse      = new THREE.Vector2(-9999, -9999);
+const tooltip    = document.getElementById('solar-tooltip');
+const ttName     = document.getElementById('tt-name');
+const ttDist     = document.getElementById('tt-dist');
+const ttPer      = document.getElementById('tt-per');
+const ttEcc      = document.getElementById('tt-ecc');
+const ttExtraRow = document.getElementById('tt-extra-row');
+
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+  mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+});
+
+canvas.addEventListener('mouseleave', () => {
+  mouse.set(-9999, -9999);
+  tooltip.classList.remove('solar-tooltip--visible');
+});
+
+function checkHover() {
+  raycaster.setFromCamera(mouse, camera);
+  const allMeshes = [...planetMeshes, ...cometMeshes];
+  const hits = raycaster.intersectObjects(allMeshes, false);
+  if (hits.length > 0) {
+    const obj  = hits[0].object;
+    const data = obj.userData.data;
+    const type = obj.userData.type;
+
+    if (type === 'planet') {
+      ttName.textContent  = data.name;
+      ttDist.textContent  = data.dist;
+      ttPer.textContent   = data.per >= 365 ? `${(data.per/365.25).toFixed(1)} años` : `${data.per} días`;
+      ttExtraRow.style.display = 'none';
+    } else {
+      ttName.textContent  = data.name || 'Cometa';
+      ttDist.textContent  = `${data.a.toFixed(2)} AU (semi-eje)`;
+      ttPer.textContent   = data.per > 0 ? `${data.per.toFixed(0)} días` : '—';
+      ttEcc.textContent   = data.e.toFixed(4);
+      ttExtraRow.style.display = '';
+    }
+    tooltip.classList.add('solar-tooltip--visible');
+  } else {
+    tooltip.classList.remove('solar-tooltip--visible');
+  }
+}
+
+// ── Simulation state ──────────────────────────────────────────
+const TODAY_J2000 = j2000(new Date());
+let simDay  = TODAY_J2000;
+let playing = true;
+
+const speedSlider = document.getElementById('speed-slider');
+const speedVal    = document.getElementById('speed-val');
+const simDateEl   = document.getElementById('sim-date');
+const playBtn     = document.getElementById('play-btn');
+
+speedSlider.addEventListener('input', () => {
+  speedVal.textContent = speedSlider.value;
+});
+
+window.togglePlay = function() {
+  playing = !playing;
+  playBtn.textContent = playing ? 'Pausar' : 'Reanudar';
+};
+
+window.setScale = function(mode) {
+  scaleMode = mode;
+  document.getElementById('btn-log').classList.toggle('solar-scale-btn--active', mode === 'log');
+  document.getElementById('btn-lin').classList.toggle('solar-scale-btn--active', mode === 'lin');
+  buildScene();
+};
+
+function formatSimDate(j) {
+  const d = new Date(new Date('2000-01-01T12:00:00Z').getTime() + j * 86400000);
+  return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+// ── Render loop ───────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+
+  const speed = parseFloat(speedSlider.value);
+  if (playing) simDay += speed * 0.25;
+
+  updatePositions(simDay);
+  checkHover();
+  controls.update();
+
+  simDateEl.textContent = formatSimDate(simDay);
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+} // end else (WebGL available)
+
+// ── Render comet cards (always, WebGL or not) ─────────────────
+(function renderCometCards() {
+  const grid = document.getElementById('comet-grid');
+  if (!COMETS_RAW.length) {
+    grid.innerHTML = '<p style="color:var(--color-muted-on-dark);font-size:14px;">No se encontraron cometas activos en este momento.</p>';
+    return;
+  }
+  grid.innerHTML = COMETS_RAW.map(c => `
+    <div class="solar-comet-card">
+      <div class="solar-comet-card__name">${c.name || '—'}</div>
+      <div class="solar-comet-card__row">Semi-eje mayor: <span>${c.a.toFixed(3)} AU</span></div>
+      <div class="solar-comet-card__row">Excentricidad: <span>${c.e.toFixed(4)}</span></div>
+      <div class="solar-comet-card__row">Inclinación: <span>${c.i.toFixed(2)}°</span></div>
+      <div class="solar-comet-card__row">Período: <span>${c.per > 0 ? c.per.toFixed(0) + ' días' : '—'}</span></div>
+    </div>`).join('');
+})();
+
+</script>
+{% endblock %}

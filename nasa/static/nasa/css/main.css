@@ -1751,6 +1751,199 @@ video.apod-embed {
   .launch-windows-grid { grid-template-columns: 1fr; }
 }
 
+/* ── Solar System ───────────────────────────────────────────── */
+.solar-canvas-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 480px;
+  background: #000;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: rgba(0, 0, 0, 0.5) 0 12px 48px 0;
+}
+
+#solar-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.solar-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-pill);
+  padding: 10px 22px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.solar-ctrl-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.solar-ctrl-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.solar-slider {
+  width: 100px;
+  accent-color: var(--color-primary-on-dark);
+  height: 3px;
+  cursor: pointer;
+}
+
+.solar-ctrl-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-on-dark);
+  min-width: 28px;
+  text-align: right;
+}
+
+.solar-scale-btn {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-pill);
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.solar-scale-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+.solar-scale-btn--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.solar-play-btn {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+
+.solar-play-btn:active { transform: scale(0.94); }
+
+.solar-ctrl-sep {
+  width: 1px;
+  height: 18px;
+  background: rgba(255,255,255,0.12);
+}
+
+/* Tooltip */
+.solar-tooltip {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  min-width: 180px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 10;
+}
+
+.solar-tooltip--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.solar-tooltip__name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.374px;
+  color: var(--color-on-dark);
+  margin-bottom: 6px;
+}
+
+.solar-tooltip__row {
+  font-size: 12px;
+  color: var(--color-muted-on-dark);
+  letter-spacing: -0.12px;
+  line-height: 1.6;
+}
+
+.solar-tooltip__row span {
+  color: var(--color-on-dark);
+  font-weight: 600;
+}
+
+/* Comets info panel */
+.solar-comet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  width: 100%;
+  margin-top: var(--space-xxl);
+  text-align: left;
+}
+
+.solar-comet-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: background 0.15s;
+}
+
+.solar-comet-card:hover { background: rgba(255, 255, 255, 0.09); }
+
+.solar-comet-card__name {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.224px;
+  color: var(--color-on-dark);
+  line-height: 1.3;
+}
+
+.solar-comet-card__row {
+  font-size: 12px;
+  color: var(--color-muted-on-dark);
+  letter-spacing: -0.12px;
+}
+
+.solar-comet-card__row span {
+  color: var(--color-on-dark);
+}
+
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 1068px) {
   .tile__headline { font-size: 34px; }
