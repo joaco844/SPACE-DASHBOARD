@@ -646,7 +646,8 @@ video.apod-embed {
   isolation: isolate;
 }
 
-#earth-map {
+#earth-map,
+#iss-map {
   width: 100%;
   height: 480px;
   background: #0a0a0f;
@@ -772,7 +773,7 @@ video.apod-embed {
 
 @media (max-width: 833px) {
   .climate-stats-grid { grid-template-columns: 1fr; }
-  #earth-map { height: 320px; }
+  #earth-map, #iss-map { height: 320px; }
   .earth-year-control { flex-direction: column; align-items: flex-start; }
 }
 
@@ -2002,4 +2003,256 @@ video.apod-embed {
 @media (max-width: 419px) {
   .tile__headline { font-size: 21px; }
   .card-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ISS Live Tracker
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Live stats ────────────────────────────────────────────── */
+.iss-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+  margin: var(--space-xl) 0 var(--space-lg);
+}
+
+.iss-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.iss-stat__value {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  color: var(--color-on-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+.iss-stat__label {
+  font-size: 11px;
+  color: var(--color-muted-on-dark);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ── Live dot ──────────────────────────────────────────────── */
+.iss-live {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-muted-on-dark);
+}
+
+.iss-live__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  flex-shrink: 0;
+  animation: iss-pulse 2s ease-in-out infinite;
+}
+
+@keyframes iss-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1);   }
+  50%       { opacity: 0.3; transform: scale(0.75); }
+}
+
+/* ── Map marker ────────────────────────────────────────────── */
+.iss-map-marker {
+  filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.85));
+  pointer-events: none;
+}
+
+/* ── Visibility banner ─────────────────────────────────────── */
+.iss-visibility-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-lg) var(--space-xl);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--color-hairline);
+  margin-bottom: var(--space-xl);
+}
+
+.iss-visibility-banner--yes {
+  background: rgba(52, 211, 153, 0.07);
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.iss-visibility-banner--no {
+  background: rgba(148, 163, 184, 0.07);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+.iss-visibility-banner__icon { font-size: 32px; flex-shrink: 0; }
+
+.iss-visibility-banner__title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: -0.224px;
+  margin: 0;
+}
+
+.iss-visibility-banner--yes .iss-visibility-banner__title { color: #059669; }
+
+.iss-visibility-banner__sub {
+  font-size: 14px;
+  color: var(--color-ink-muted-48);
+  margin: 4px 0 0;
+}
+
+/* ── Passes columns ────────────────────────────────────────── */
+.iss-passes-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xxl);
+  margin-bottom: var(--space-xl);
+}
+
+.iss-passes-col__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.iss-passes-col__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.iss-location-btn {
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.iss-location-btn:hover   { opacity: 0.82; }
+.iss-location-btn:disabled { opacity: 0.45; cursor: default; }
+
+/* ── Pass cards ────────────────────────────────────────────── */
+.iss-pass-card {
+  background: var(--color-surface-pearl);
+  border: 1px solid var(--color-hairline);
+  border-radius: 10px;
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.iss-pass-card--visible {
+  border-color: rgba(52, 211, 153, 0.45);
+  background: rgba(52, 211, 153, 0.04);
+}
+
+.iss-pass-card__top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: 6px;
+}
+
+.iss-pass-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: rgba(0, 0, 0, 0.07);
+  color: var(--color-ink-muted-48);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.iss-pass-badge--visible {
+  background: rgba(52, 211, 153, 0.15);
+  color: #059669;
+}
+
+.iss-pass-card__time {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: -0.2px;
+}
+
+.iss-pass-card__meta {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--color-ink-muted-48);
+}
+
+.iss-pass-card__meta strong { color: var(--color-ink); }
+
+.iss-pass-empty,
+.iss-location-hint {
+  font-size: 14px;
+  color: var(--color-ink-muted-48);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.iss-passes-note {
+  font-size: 12px;
+  color: var(--color-ink-muted-48);
+  line-height: 1.55;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-hairline);
+}
+
+/* ── Crew ──────────────────────────────────────────────────── */
+.iss-crew-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--space-md);
+  margin-top: var(--space-xl);
+}
+
+.iss-crew-card {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: var(--space-xl) var(--space-md);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.iss-crew-card__icon { font-size: 30px; }
+
+.iss-crew-card__name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-on-dark);
+  line-height: 1.35;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .iss-stats       { grid-template-columns: repeat(2, 1fr); }
+  .iss-passes-cols { grid-template-columns: 1fr; gap: var(--space-xl); }
+}
+
+@media (max-width: 480px) {
+  .iss-stat__value { font-size: 20px; }
 }

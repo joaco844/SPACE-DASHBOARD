@@ -9,4 +9,5 @@ urlpatterns = [
     path("gallery/download/", views.download_proxy, name="download_proxy"),
     path("mission/", views.mission, name="mission"),
     path("solar/", views.solar_system, name="solar_system"),
+    path("iss/", views.iss, name="iss"),
 ]

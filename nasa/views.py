@@ -236,6 +236,45 @@ def get_comets():
         return []
 
 
+def get_iss_data():
+    astronauts = []
+    try:
+        r = requests.get('http://api.open-notify.org/astros.json', timeout=6)
+        r.raise_for_status()
+        astronauts = [p for p in r.json().get('people', []) if p.get('craft') == 'ISS']
+    except Exception as e:
+        print(f"Error fetching ISS astronauts: {e}")
+
+    tle1, tle2 = '', ''
+    # wheretheiss.at returns JSON with line1/line2; ivanstanojevic is JSON fallback
+    tle_sources = [
+        ('json', 'https://api.wheretheiss.at/v1/satellites/25544/tles'),
+        ('json', 'https://tle.ivanstanojevic.me/api/tle/25544'),
+    ]
+    for fmt, url in tle_sources:
+        try:
+            r = requests.get(url, timeout=6, headers={'User-Agent': 'SpaceDashboard/1.0'})
+            r.raise_for_status()
+            data = r.json()
+            t1, t2 = data.get('line1', ''), data.get('line2', '')
+            if t1.startswith('1 ') and t2.startswith('2 '):
+                tle1, tle2 = t1, t2
+                break
+        except Exception as e:
+            print(f"Error fetching TLE from {url}: {e}")
+
+    return astronauts, tle1, tle2
+
+
+def iss(request):
+    astronauts, tle1, tle2 = get_iss_data()
+    return render(request, 'iss.html', {
+        'astronauts_json': json.dumps(astronauts),
+        'tle1': tle1,
+        'tle2': tle2,
+    })
+
+
 def solar_system(request):
     comets = get_comets()
     return render(request, "solar.html", {
